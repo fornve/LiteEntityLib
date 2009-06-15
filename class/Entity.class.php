@@ -4,13 +4,8 @@
  * @package framework
  * @subpackage entity
  * @author Marek Dajnowski (first release 20080614)
- * @version 1.2
- */
-/**
- *  Changelog
- *
- *	1.1.2 20090514
- *	    SQLite	
+ * Â@documentationhttp://sum-e.com/wiki/index.php5/Entity 
+ * @version 1.21.4
  */
 class Entity
 {
@@ -85,7 +80,7 @@ class Entity
 		}
 		elseif( $this->db->errno )
 		{
-			$this->Error( $arguments );
+			$this->Error( $this->db->errno, $arguments );
 		}
 
 		if( $result === null )
@@ -102,8 +97,24 @@ class Entity
 	 * @return array
 	 * Returns array of objects
 	 */
-	function Collection( $query, $arguments = null, $class = __CLASS__ )
+	function Collection( $query, $arguments = null, $class = __CLASS__, $limit = null, $offset = null )
 	{
+		if( $limit )
+		{
+			if( $limit )
+			{
+				$query .= " LIMIT ?";
+			}
+
+			if( $offset > 0 )
+			{
+				$query .= ", ?";
+				$arguments[] = $offset;
+			}
+
+			$arguments[] = $limit;
+		}
+		
 		$query = $this->Prefix( $query );
 		$query = $this->Arguments( $query, $arguments );
 
@@ -130,7 +141,7 @@ class Entity
 		}
 		elseif( $this->db->errno )
 		{
-			$this->Error( $arguments );
+				$this->Error( $this->db->error, $arguments );
 		}
 
 		if( $class && $this->result )
@@ -146,6 +157,22 @@ class Entity
 	}
 
 	/**
+	 * Retrieve column group results
+	 * @param int $column
+	 * @return object
+	 * Returns array of objects type of entity
+	 */	function TypeCollection( $type )
+	{
+
+		if( !in_array( $type, $this->schema ) )
+			return false;
+
+		$table_name = strtolower( get_class( $this ) );
+		$query = "SELECT {$type} FROM {$table_name} GROUP BY {$type}";
+		return $this->Collection( $query, null, 'stdClass' );
+	}
+
+	/**
 	 * Retrieve row from database where id = $id ( or id => $id_name  )
 	 * @param int $id
 	 * @param string $id_name
@@ -157,8 +184,6 @@ class Entity
 	{
 		if( is_int( $id ) )
 		{
-			//$object_name = get_class( $this );
-			//$object = eval( "return new {$object_name}" ); //hit
 			$object = new $class;
 			$table = strtolower( $class );
 			$entity = new Entity();
@@ -467,18 +492,18 @@ class Entity
 	 * Email error detais to administrator
 	 * @param mixed $arguments 
 	 */
-	private function Error( $arguments )
+	private function Error( $db, $arguments )
 	{
 		$break = "=================================================================";
 		$headers = "From: Entity crash bum bum at {". PROJECT_NAME ."}! <www@". PROJECT_NAME .">";
-		$message = "Entity object: \n\n". var_export( $this, true ) ."\n\n{$break}\n\nArguments:\n\n". var_export( $arguments, true ) ."\n\n{$break}\n\nServer:\n\n". var_export( $_SERVER, true ) ."\n\n{$break}\n\nPOST:\n\n". var_export( $_POST, true ) ."\n\n{$break}\n\nSession:\n\n". var_export( $_SESSION, true );
+		$message = "Entity object: \n\n". var_export( $this, true ) ."\n\n{$break}\n\nArguments:\n\n".  var_export( $this, true ) ."\n\n{$break}\n\Database error:\n\n". var_export( $db, true ) ."\n\n{$break}\n\nServer:\n\n". var_export( $_SERVER, true ) ."\n\n{$break}\n\nPOST:\n\n". var_export( $_POST, true ) ."\n\n{$break}\n\nSession:\n\n". var_export( $_SESSION, true );
 
 		if( PRODUCTION )
 			mail( 'fornve@yahoo.co.uk', 'Database entity Collection error', $message, $headers );
 		else
 			mail( 'tigi@sunforum.co.uk', 'Database entity Collection error', $message, $headers );
 
-		die( '<html><head><title>Entity crash bum bum</title></head><body>Wow! We have a problem! No worries all details have been sent to our development team. We are sorry for any inconvience.</body></html>' );
+		die( '<html><title>Anadvert.co.uk</title><head><title>Entity crash bum bum</title></head><body>Wow! We have a problem! No worries all details have been sent to our development team. We are sorry for any inconvience.</body></html>' );
 	}
 
 }
