@@ -4,8 +4,8 @@
  * @package framework
  * @subpackage entity
  * @author Marek Dajnowski (first release 20080614)
- * �@documentationhttp://sum-e.com/wiki/index.php5/Entity 
- * @version 1.21.4
+ * @documentationhttp://sum-e.com/wiki/index.php5/Entity 
+ * @version 1.1.4
  */
 class Entity
 {
@@ -35,9 +35,9 @@ class Entity
 
 	function __destruct()
 	{
-		if ( !$this->db )
+		if ( is_object( $this->db ) )
 		{
-			$this->db->close();
+			@$this->db->close(); // sometimes throws warning - to be investigated - we don't like @
 		}
 	}
 

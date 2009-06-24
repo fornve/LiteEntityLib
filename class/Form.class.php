@@ -1,32 +1,33 @@
 <?php
+
 	class Form
 	{
-			function __controller( $fields, $method = 'GET' )
+		public $fields = array();
+		public $submit = array( 'value' => 'Submit' );
+		public $posted = false;
+
+		function __construct( $action = "/", $method = 'get' )
+		{
+			$this->action = $action;
+			$this->method = $method;
+
+			if( $method == strtolower( $_SERVER[ 'REQUEST_METHOD' ] ) )
+				$this->posted = true;
+		}
+
+		function Validate()
+		{
+			if( !$this->posted )
+				return false;
+
+			if( $this->fields ) foreach( $this->fields as $field )
 			{
-					if( $method == 'GET' )
-							$this->request_method = INPUT_GET;
-					elseif( $method == 'POST' )
-							$this->request_method = INPUT_POST;
-
-					$this->fields = $fields;
-
-					if( $this->fields ) foreach( $this->fields as $field )
-					{
-							$this->$field = new Form_Field();
-							$this->$field->value = filter_input( $this->request_method, $field );
-					}
+				$error += count( $field->error );
 			}
 
-			function Validate()
-			{
-				if( $this->fields ) foreach( $this->fields as $field )
-				{
-					if( !$this->$field->Validate() )
-						$errors++;
-				}
-
-				return $errors;
-			}	
-
+			if( $error > 0 )
+				return false;
+			else
+				return true;
+		}
 	}
-
