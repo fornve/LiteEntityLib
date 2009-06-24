@@ -4,7 +4,7 @@
  * @package framework
  * @subpackage entity
  * @author Marek Dajnowski (first release 20080614)
- * Â@documentationhttp://sum-e.com/wiki/index.php5/Entity 
+ * ï¿½@documentationhttp://sum-e.com/wiki/index.php5/Entity 
  * @version 1.21.4
  */
 class Entity
@@ -315,7 +315,7 @@ class Entity
 	{
 		$table = strtolower( $class );
 		$query = "SELECT * from `{$table}`";
-		$ntity = new Entity();
+		$entity = new Entity();
 		return $entity->Collection( $query, null, $class );
 	}
 
