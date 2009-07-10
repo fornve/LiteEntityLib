@@ -4,8 +4,8 @@
  * @package framework
  * @subpackage entity
  * @author Marek Dajnowski (first release 20080614)
- * @documentationhttp://sum-e.com/wiki/index.php5/Entity 
- * @version 1.1.4
+ * @documentationhttp://dajnowski.net/wiki/index.php5/Entity 
+ * @version 1.2
  */
 class Entity
 {
@@ -24,7 +24,7 @@ class Entity
 		}
 		elseif( !is_object( $this->db ) && DB_TYPE == 'sqlite' )
 		{
-			$this->db = new SQLiteDatabase( DB_FILE );
+			$this->db = new SQLite3( DB_FILE );
 		}
 		else
 			die( 'Configuration error. Database unknown.' );	
@@ -351,7 +351,11 @@ class Entity
 		}
 	}
 
-	public static function Array2Entity( $arrayi, $class )
+	/**
+	 * Converts array into object
+	 * @return object
+	 */ 
+	public static function Array2Entity( $array, $class )
 	{
 		if( $array ) 
 		{
@@ -359,7 +363,8 @@ class Entity
 
 			foreach ( $array as $key => $value )
 			{
-				$object->$key = $value;
+				if( !is_numeric( $key ) )	
+					$object->$key = $value;
 			}
 		}
 
@@ -394,7 +399,7 @@ class Entity
 		{
 			while( $row = $result->fetchArray() )
 			{
-				$this->result[] = Entity::Array2Entity( $row[] );
+				$this->result[] = Entity::Array2Entity( $row, $class );
 			}
 		}
 
