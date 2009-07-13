@@ -5,7 +5,7 @@
  * @subpackage entity
  * @author Marek Dajnowski (first release 20080614)
  * @documentationhttp://dajnowski.net/wiki/index.php5/Entity 
- * @version 1.2
+ * @version 1.2.1
  */
 class Entity
 {
@@ -141,7 +141,7 @@ class Entity
 		}
 		elseif( $this->db->errno )
 		{
-				$this->Error( $this->db->error, $arguments );
+			$this->Error( $this->db->error, $arguments );
 		}
 
 		if( $class && $this->result )
@@ -149,8 +149,7 @@ class Entity
 			$class = new $class;
 
 			if( $class->schema )
-
-			$this->result = Entity::Stripslashes( $this->result, $class->schema );
+				$this->result = Entity::Stripslashes( $this->result, $class->schema );
 		}
 
 		return $this->result;
@@ -488,6 +487,7 @@ class Entity
 		foreach( $schema as $key )
 		{
 			 $result[ 0 ]->$key = stripslashes( $result[ 0 ]->$key );
+
 		}
 
 		return $result;
