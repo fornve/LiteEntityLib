@@ -20,7 +20,7 @@ class Entity
 	{
 		if ( !is_object( $this->db ) && DB_TYPE == 'mysql' )
 		{
-            $this->db = new mysqli( DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME );
+            		$this->db = new mysqli( DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME );
 		}
 		elseif( !is_object( $this->db ) && DB_TYPE == 'sqlite' )
 		{
