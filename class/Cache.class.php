@@ -10,6 +10,9 @@
 			{
 				case 'memcache':
 				{
+					if( !class_exists( 'Memcache' ) )
+						return false;
+
 					$this->cache = new Memcache();
 					
 					if( !$this->cache->connect( MEMCACHE_HOST, MEMCACHE_PORT ) )
