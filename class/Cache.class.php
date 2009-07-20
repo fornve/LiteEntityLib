@@ -15,7 +15,7 @@
 
 					$this->cache = new Memcache();
 					
-					if( !$this->cache->connect( MEMCACHE_HOST, MEMCACHE_PORT ) )
+					if( !$this->cache->connect( CACHE_HOST, (int)CACHE_PORT ) )
 						$this->cache = null;
 						
 					break;
