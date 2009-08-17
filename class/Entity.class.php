@@ -4,7 +4,7 @@
  * @package framework
  * @subpackage entity
  * @author Marek Dajnowski (first release 20080614)
- * @documentationhttp://dajnowski.net/wiki/index.php5/Entity 
+ * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @version 1.2.1
  */
 class Entity
@@ -297,6 +297,7 @@ class Entity
 	}
 
 	function PreDelete() {}
+	function FlushCache() {}
 
 	function Delete()
 	{
