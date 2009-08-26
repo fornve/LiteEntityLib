@@ -6,7 +6,9 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @version 1.2.1
+ * @License GPL v3
  */
+
 class Entity
 {
 	protected $db;
