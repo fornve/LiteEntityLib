@@ -3,7 +3,9 @@
  * I got an idea after reading http://lesscss.org/ so is good to have it for php
  * Marek Dajnowski <marek@dajnowski.net>
  *
- * version 1.0 - variables
+ * @version 1.0 - variables
+ * @documentation: http://www.dajnowski.net/wiki/index.php5/Lesscss & http://lesscss.org
+ *
  */
 class Lesscss
 {

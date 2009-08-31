@@ -1,5 +1,11 @@
 <?php
 
+	/*
+	 * @package LiteEntityLib http://github.com/fornve/LiteEntityLib/tree
+	 * @version 1.0
+	 * @author Marek Dajnowski http://sum-e.com/Contactus
+	 * @documentation http://www.dajnowski.net/wiki/index.php5/Cache
+	 */
 	class Cache
 	{
 		private $cache = null;
