@@ -51,7 +51,7 @@ class Lesscss
 
 	public function RemoveComments()
 	{
-		$pattern = '!\/\*[\s\w]+\*\/!';
+		$pattern = '@<![\s\S]*?--[ \t\n\r]*>@';
 		$this->lesscss = preg_replace( $pattern, '', $this->lesscss );
 	}
 

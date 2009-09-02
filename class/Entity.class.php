@@ -502,16 +502,22 @@ class Entity
 	 */
 	private function Error( $db, $arguments )
 	{
-		$break = "=================================================================";
-		$headers = "From: Entity crash bum bum at {". PROJECT_NAME ."}! <www@". PROJECT_NAME .">";
-		$message = "Entity object: \n\n". var_export( $this, true ) ."\n\n{$break}\n\nArguments:\n\n".  var_export( $this, true ) ."\n\n{$break}\n\Database error:\n\n". var_export( $db, true ) ."\n\n{$break}\n\nServer:\n\n". var_export( $_SERVER, true ) ."\n\n{$break}\n\nPOST:\n\n". var_export( $_POST, true ) ."\n\n{$break}\n\nSession:\n\n". var_export( $_SESSION, true );
-
 		if( PRODUCTION )
-			mail( 'fornve@yahoo.co.uk', 'Database entity Collection error', $message, $headers );
-		else
-			mail( 'tigi@sunforum.co.uk', 'Database entity Collection error', $message, $headers );
+		{
+			$break = "=================================================================";
+			$headers = "From: Entity crash bum bum at {". PROJECT_NAME ."}! <www@". PROJECT_NAME .">";
+			$message = "Entity object: \n\n". var_export( $this, true ) ."\n\n{$break}\n\nArguments:\n\n".  var_export( $this, true ) ."\n\n{$break}\n\Database error:\n\n". var_export( $db, true ) ."\n\n{$break}\n\nServer:\n\n". var_export( $_SERVER, true ) ."\n\n{$break}\n\nPOST:\n\n". var_export( $_POST, true ) ."\n\n{$break}\n\nSession:\n\n". var_export( $_SESSION, true );
 
-		die( '<html><title>Anadvert.co.uk</title><head><title>Entity crash bum bum</title></head><body>Wow! We have a problem! No worries all details have been sent to our development team. We are sorry for any inconvience.</body></html>' );
+			mail( ADMIN_EMAIL, 'Database entity Collection error', $message, $headers );
+		
+			header( "Location: /Error/Database" );
+			exit;
+		}
+		else
+		{
+			$var_dump( $this->error, $this->query );
+		}
+		
 	}
 
 }
