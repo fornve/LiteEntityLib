@@ -502,7 +502,7 @@ class Entity
 	 */
 	private function Error( $db, $arguments )
 	{
-		if( PRODUCTION )
+		if( defined( PRODUCTION ) && defined( ADMIN_EMAIL ) )
 		{
 			$break = "=================================================================";
 			$headers = "From: Entity crash bum bum at {". PROJECT_NAME ."}! <www@". PROJECT_NAME .">";
@@ -515,7 +515,7 @@ class Entity
 		}
 		else
 		{
-			$var_dump( $this->error, $this->query );
+			var_dump( $this->error, $this->query );
 		}
 		
 	}
