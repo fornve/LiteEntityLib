@@ -3,13 +3,22 @@
 	{
 		function __construct( $name, $label, $type = 'text', $default = null )
 		{
+			$this->name = $name;
 			$this->label = $label;
 			$this->type = $type;
 
-			if( $input = FormField::GetInput( $name ) )
-				$this->value = $input;
-			else
+			if( $type == 'checkbox' )
+			{
 				$this->value = $default;
+				$this->SetCheckbox( $default );
+			}
+			else
+			{
+				if( $input = FormField::GetInput( $name ) )
+					$this->value = $input;
+				else
+					$this->value = $default;
+			}
 		}
 
 		static function GetInput( $name )
@@ -20,6 +29,20 @@
 				$method = INPUT_GET;
 
 			return filter_input( $method, $name );
+		}
+
+		private function SetCheckbox()
+		{
+			if( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' )
+			{
+				if( $_POST[ $this->name ] )
+					$this->checked = 'checked';
+			}
+			else
+			{
+				if( $_GET[ $this->name ] )
+					$this->checked = 'checked';
+			}
 		}
 
 		function Validation( $validation, $p1 = null, $p2 = null, $p3 = null, $p4 = null )
@@ -108,6 +131,24 @@
 
 				$this->error[] = $error_text;
 			}
+		}
+
+		private function NotInDatabase( $error_text, $table, $column )
+		{
+			if( !$this->value )
+				return false;
+
+			$query = "SELECT * FROM `{$table}` WHERE `{$column}` = ?";
+			$entity = new Entity();
+
+			if( !$entity->GetFirstResult( $query, $this->value ) )
+			{
+				if( !$error_text )
+					$error_text = 'Not in database';
+
+				$this->error[] = $error_text;
+			}
+
 		}
 
 		// end of validators
