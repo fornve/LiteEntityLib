@@ -313,8 +313,11 @@ class Entity
 	 * Gets all entries from database
 	 * @param $class string class name
 	 */
-	static function GetAll( $class = __CLASS__ )
+	static function GetAll( $class = null )
 	{
+		if( !$class )
+			die( "Entity::GetAll - class name cannot be null." );
+
 		$table = strtolower( $class );
 		$query = "SELECT * from `{$table}`";
 		$entity = new Entity();
