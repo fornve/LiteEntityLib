@@ -55,7 +55,7 @@
 							>{$country->name}</option>
 						{/foreach}
 					</select>
-				{elseif $field->type == 'checkbox' || $field->type = 'radio'}
+				{elseif $field->type == 'checkbox' || $field->type == 'radio'}
 					<input type="{$field->type}" id="{$name}" name="{$name}"
 						{if $field->class} class="{$field->class}"{/if}
 						{if $field->maxlength} maxlength="{$field->maxlength}"{/if}
