@@ -5,12 +5,13 @@
  * @subpackage entity
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
- * @version 1.2.1
- * @License GPL v3
+ * @version 1.3-beta
+ @License GPL v3
  */
 
 class Entity
 {
+	private static $dblink;
 	protected $db;
 	protected $prefix = null;
 	protected $multi_query = false;
@@ -20,27 +21,49 @@ class Entity
 
 	function __construct()
 	{
-		if ( !is_object( $this->db ) && DB_TYPE == 'mysql' )
-		{
-            		$this->db = new mysqli( DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME );
-		}
-		elseif( !is_object( $this->db ) && DB_TYPE == 'sqlite' )
-		{
-			$this->db = new SQLite3( DB_FILE );
-		}
-		else
-			die( 'Configuration error. Database unknown.' );	
+		$this->db = Entity::Instance();
+	}
 
-		if( !$this->db )
+	public static function &Instance()
+	{
+		if( !is_object( self::$dblink ) )
+		{
+			self::$dblink = self::Connect();
+		}
+
+		return self::$dblink;
+	}
+
+	function Connect()
+	{
+		switch( DB_TYPE )
+		{
+			case 'mysql':
+			{
+           		$db = new mysqli( DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME );
+				break;
+			}
+			case 'sqlite':
+			{
+				$db = new SQLite3( DB_FILE );
+				break;
+			}
+			default:
+				die( 'Configuration error. Database unknown.' );	
+		}
+
+		if( !$db )
 			die( 'Database connection failed.' );
+
+		return $db;
 	}
 
 	function __destruct()
 	{
-		if ( is_object( $this->db ) )
+		/*if ( is_object( $this->db ) )
 		{
 			@$this->db->close(); // sometimes throws warning - to be investigated - we don't like @
-		}
+		}*/
 	}
 
 	/**
