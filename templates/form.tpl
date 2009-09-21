@@ -60,7 +60,7 @@
 						{if $field->class} class="{$field->class}"{/if}
 						{if $field->maxlength} maxlength="{$field->maxlength}"{/if}
 						{if $field->style} style="{$field->style}"{/if}
-						value="{if $field->value}{$field->value}{/if}"
+						value="{if $field->value}{$field->value}{else}1{/if}"
 						{if $field->onclick} class="{$field->onclick}"{/if}
 						{if $field->checked} checked="checked"{/if}
 					 />

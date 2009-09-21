@@ -151,5 +151,13 @@
 
 		}
 
+		private function Checked( $error_text = "This field is required." )
+		{
+			if( $this->checked != 'checked' )
+			{
+				$this->error[] = $error_text;
+			}
+		}
+
 		// end of validators
 	}

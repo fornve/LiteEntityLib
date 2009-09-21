@@ -5,7 +5,8 @@
  * @subpackage entity
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
- * @version 1.3-beta
+ * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
+ * @version 1.3
  @License GPL v3
  */
 
