@@ -41,19 +41,29 @@
 		function set( $key, $var , $flag = null, $expire = null )
 		{
 			if( $this->cache )
+			{
+				$_SESSION[ 'cache_query' ][] = $key;
 				$this->cache->set( $key, $var, $flag, $expire );
+			}
 		}
 
 		function get( $key, $flags = null )
 		{
+				
 			if( $this->cache )
+			{
+				$_SESSION[ 'cache_query' ][] = $key;
 				return $this->cache->get( $key, $flags );
+			}
 		}
 
 		function delete( $key, $timeout = null )
 		{
 			if( $this->cache )
+			{
+				$_SESSION[ 'cache_query' ][] = $key;
 				$this->cache->delete( $key, $timeout );
+			}
 		}
 
 		function close()
