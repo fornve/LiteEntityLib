@@ -55,15 +55,29 @@
 							>{$country->name}</option>
 						{/foreach}
 					</select>
-				{elseif $field->type == 'checkbox' || $field->type == 'radio'}
+				{elseif $field->type == 'checkbox'}
+					{if !$field->options}
 					<input type="{$field->type}" id="{$name}" name="{$name}"
 						{if $field->class} class="{$field->class}"{/if}
-						{if $field->maxlength} maxlength="{$field->maxlength}"{/if}
 						{if $field->style} style="{$field->style}"{/if}
 						value="{if $field->value}{$field->value}{else}1{/if}"
 						{if $field->onclick} class="{$field->onclick}"{/if}
 						{if $field->checked} checked="checked"{/if}
-					 />
+					/>
+				{elseif $field->type == 'radio'}
+					<ul>
+					{foreach from=$field->options item=option}
+						<li>
+							<input type="{$field->type}" name="{$name}"
+								{if $field->class} class="{$field->class}"{/if}
+								{if $field->style} style="{$field->style}"{/if}
+								value="{if $field->value}{$field->value}{else}1{/if}"
+								{if $field->onclick} class="{$field->onclick}"{/if}
+								{if $field->checked} checked="checked"{/if}
+							/>
+						</li>
+					{/foreach}
+					</ul>
 				{elseif $field->type == 'file'}
 					<input type="file" id="{$name}" name="{$name}"
 						{if $field->class} class="{$field->class}"{/if}
