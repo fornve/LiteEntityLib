@@ -170,7 +170,7 @@ class Entity
 			$this->Error( $this->db->error, $arguments );
 		}
 
-		if( $class && $this->result )
+		if( $class && isset( $this->result ) )
 		{
 			$class = new $class;
 
@@ -178,7 +178,8 @@ class Entity
 				$this->result = Entity::Stripslashes( $this->result, $class->schema );
 		}
 
-		return $this->result;
+		if( isset( $this->result ) )
+			return $this->result;
 	}
 
 	/**
@@ -442,9 +443,11 @@ class Entity
 	private function Prefix( $query )
 	{
 		//global $mosConfig_dbprefix; // joomla 1.0
-
-		$exp = explode( '#__', $query );
-		$query = implode( DB_TABLE_PREFIX, $exp );
+		if( defined( 'DB_TABLE_PREFIX' ) )
+		{
+			$exp = explode( '#__', $query );
+			$query = implode( DB_TABLE_PREFIX, $exp );
+		}
 
 		return $query;
 	}
