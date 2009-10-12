@@ -67,14 +67,15 @@
 				{elseif $field->type == 'radio'}
 					<ul>
 					{foreach from=$field->options item=option}
-						<li>
+						<li{if $option.class} class="{$option.class}"{/if}>
 							<input type="{$field->type}" name="{$name}"
 								{if $field->class} class="{$field->class}"{/if}
 								{if $field->style} style="{$field->style}"{/if}
-								value="{if $field->value}{$field->value}{else}1{/if}"
+								value="{if $field->value}{$option->value}{else}1{/if}"
 								{if $field->onclick} class="{$field->onclick}"{/if}
-								{if $field->checked} checked="checked"{/if}
+								{if $field->value==$option.value} checked="checked"{/if}
 							/>
+							<span>{$option.label}</span>
 						</li>
 					{/foreach}
 					</ul>
