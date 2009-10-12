@@ -56,7 +56,6 @@
 						{/foreach}
 					</select>
 				{elseif $field->type == 'checkbox'}
-					{if !$field->options}
 					<input type="{$field->type}" id="{$name}" name="{$name}"
 						{if $field->class} class="{$field->class}"{/if}
 						{if $field->style} style="{$field->style}"{/if}
