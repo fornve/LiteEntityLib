@@ -70,7 +70,7 @@
 							<input type="{$field->type}" name="{$name}"
 								{if $field->class} class="{$field->class}"{/if}
 								{if $field->style} style="{$field->style}"{/if}
-								value="{if $field->value}{$option->value}{else}1{/if}"
+								value="{$option.value}"
 								{if $field->onclick} class="{$field->onclick}"{/if}
 								{if $field->value==$option.value} checked="checked"{/if}
 							/>
