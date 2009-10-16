@@ -4,7 +4,7 @@ class Pager
 {
 	public $max = 0;		// number of elements
 	public $elements = 10;	// elements on page
-	public $offset = 1;		// offset ( page )
+	public $offset = 1;		// offset ( page ) - not elements
 	public $self = '/';		// base url	
 	public $option = null;	// filter option
 	public $order = null;	// result order option
@@ -15,6 +15,10 @@ class Pager
 	{
 		$this->self = $self;
 		$this->max = $max;
+
+		if( $offset < 1 )
+			$offset = 1;
+
 		$this->offset = $offset;
 
 		$this->elements_loop = $this->elements + 1;
