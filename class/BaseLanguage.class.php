@@ -21,6 +21,12 @@
 			}
 		}
 
+		public function __get( $item )
+		{
+			if( !isset( $this->$item ) )
+				$this->$item = $item;
+		}
+
 		public function _( $item )
 		{
 			$this->Get( $item );
