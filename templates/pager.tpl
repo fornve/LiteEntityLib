@@ -1,3 +1,4 @@
+{if $pager}
 {strip}
 {assign var=min value=$pager->offset*$pager->elements-5-$pager->elements}
 
@@ -47,3 +48,4 @@
 {/if}
 </ul>
 {/strip}
+{/if}
