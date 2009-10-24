@@ -41,7 +41,7 @@ class Entity
 		{
 			case 'mysql':
 			{
-           		$db = new mysqli( DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME );
+				$db = new mysqli( DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME );
 				break;
 			}
 			case 'sqlite':
@@ -254,7 +254,7 @@ class Entity
 	{
 		$table = strtolower( get_class( $this ) );
 
-        $id = $this->schema[ 0 ];
+		$id = $this->schema[ 0 ];
 
 		if( !$this->$id )
 			$this->$id = $this->Create( $table );
@@ -297,13 +297,13 @@ class Entity
 		$id = $this->schema[ 0 ];
 		$column = $this->schema[ 1 ];
 
-        if( $id_value )
-            $query = "INSERT INTO `{$table}` ( `{$id}`, `{$column}` ) VALUES ( {$id_value}, 0 )";
-        else
-            $query = "INSERT INTO `{$table}` ( `{$column}` ) VALUES ( 0 )";
+		if( $id_value )
+			$query = "INSERT INTO `{$table}` ( `{$id}`, `{$column}` ) VALUES ( {$id_value}, 0 )";
+		else
+			$query = "INSERT INTO `{$table}` ( `{$column}` ) VALUES ( 0 )";
 
 
-        $this->Query( $query );
+		$this->Query( $query );
 		$result = $this->GetFirstResult( "SELECT {$id} FROM `{$table}` WHERE `{$column}` = 0 ORDER BY `{$id}` DESC LIMIT 1" );
 		return $result->$id;
 	}
@@ -328,7 +328,7 @@ class Entity
 
 	function Delete()
 	{
-        $this->PreDelete();
+		$this->PreDelete();
 		$table = strtolower( get_class( $this ) );
 		$query = "DELETE FROM `{$table}` WHERE id = ?";
 		$this->query( $query, $this->id );
