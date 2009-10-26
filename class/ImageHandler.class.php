@@ -59,6 +59,9 @@
 			$width = $this->width;
 			$height = $this->height;
 
+			if( !$this->width || !$this->source_height ) // check if image sizes are > than 0
+				return false;
+
 			if( $this->height / $this->width < $this->source_width / $this->source_height ) // fit to width
 			{
 				$resize_ratio = $this->width / $this->source_width;
