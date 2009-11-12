@@ -72,6 +72,9 @@ class Common
 
 		foreach ( $array as $key )
 		{
+			if( strlen( $key ) < 1 )
+				die( 'Input key empty in Common::Inputs.' );
+			
 			$input->$key = addslashes( filter_input( $input_type, $key ) );
 		}
 

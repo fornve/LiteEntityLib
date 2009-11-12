@@ -1,5 +1,5 @@
 {strip}
-<form method="{$form->method}" action="{$form->action}"{if $form->file_upload} enctype="multipart/data"{/if}>
+<form method="{$form->method}" action="{$form->action}"{if $form->file_upload} enctype="multipart/form-data"{/if}>
 	<table>
 		{foreach from=$form->fields key=name item=field}
 		<tr{if $field->error|@count} class="error"{/if}>

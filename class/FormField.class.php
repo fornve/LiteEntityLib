@@ -14,7 +14,9 @@
 			}
 			else
 			{
-				if( $input = FormField::GetInput( $name ) )
+				$input = FormField::GetInput( $name );
+				
+				if( $input !== null )
 					$this->value = $input;
 				else
 					$this->value = $default;

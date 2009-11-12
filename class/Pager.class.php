@@ -19,7 +19,7 @@ class Pager
 		if( $page < 1 )
 			$page = 1;
 
-		$this->offset = $page;
+		$this->page = $page;
 
 		$this->elements_loop = $this->elements + 1;
 	}
