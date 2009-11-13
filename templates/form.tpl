@@ -13,10 +13,12 @@
 						{if $field->class} class="{$field->class}"{/if}
 						{if $field->style} style="{$field->style}"{/if}
 						{if $field->onclick} class="{$field->onclick}"{/if}
+						{if $field->disabled} disabled="disabled"{/if}
 					/>
 				{elseif $field->type == 'textarea' || $field->type == 'tiny_mce'}
 					<textarea id="{$name}" name="{$name}" id="{$name}"
 						{if $field->class} class="{$field->class}"{/if}
+						{if $field->disabled} disabled="disabled"{/if}
 						{if $field->style} style="{$field->style}"{/if}
 						{if $field->onclick} class="{$field->onclick}"{/if}>{if $field->value}{$field->value}{/if}</textarea>
 
@@ -33,6 +35,7 @@
 						{if $field->class} class="{$field->class}"{/if}
 						{if $field->style} style="{$field->style}"{/if}
 						{if $field->onclick} class="{$field->onclick}"{/if}
+						{if $field->disabled} disabled="disabled"{/if}
 						>
 						{foreach from=$field->options item=option key=value}
 							<option
@@ -48,6 +51,7 @@
 						{if $field->class} class="{$field->class}"{/if}
 						{if $field->style} style="{$field->style}"{/if}
 						{if $field->onclick} class="{$field->onclick}"{/if}
+						{if $field->disabled} disabled="disabled"{/if}
 						>
 						{foreach from=$field->options item=country}
 							<option value="{$country->code}"
@@ -62,6 +66,7 @@
 						value="{if $field->value}{$field->value}{else}1{/if}"
 						{if $field->onclick} class="{$field->onclick}"{/if}
 						{if $field->checked} checked="checked"{/if}
+						{if $field->disabled} disabled="disabled"{/if}
 					/>
 				{elseif $field->type == 'radio'}
 					<ul>
@@ -85,6 +90,7 @@
 						{if $field->style} style="{$field->style}"{/if}
 						value="{if $field->value}{$field->value}{/if}"
 						{if $field->onclick} class="{$field->onclick}"{/if}
+						{if $field->disabled} disabled="disabled"{/if}
 					/>
 				{else}
 					<input type="text" id="{$name}" name="{$name}"
@@ -93,6 +99,7 @@
 						{if $field->style} style="{$field->style}"{/if}
 						value="{if $field->value}{$field->value}{/if}"
 						{if $field->onclick} class="{$field->onclick}"{/if}
+						{if $field->disabled} disabled="disabled"{/if}
 					/>
 				{/if}
 			</td>
