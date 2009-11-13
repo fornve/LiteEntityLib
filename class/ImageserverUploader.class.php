@@ -57,6 +57,7 @@ class ImageserverUploader {
 				'service' => $this->service
 			));
 
+		error_log( 'Uploading file: '. $filename .' into dir '. $remoteDir );
 
 		if (strpos($data, 'HTTP/1.1 200 OK') === false)
 			return false;

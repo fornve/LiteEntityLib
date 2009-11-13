@@ -42,7 +42,7 @@
 		{
 			if( $this->cache )
 			{
-				$_SESSION[ 'cache_query' ][] = $key;
+				$_SESSION[ 'cache_query' ][] = "+ ". $key;
 				$this->cache->set( $key, $var, $flag, $expire );
 			}
 		}
@@ -52,7 +52,7 @@
 				
 			if( $this->cache )
 			{
-				$_SESSION[ 'cache_query' ][] = $key;
+				$_SESSION[ 'cache_query' ][] = "= ". $key;
 				return $this->cache->get( $key, $flags );
 			}
 		}
@@ -61,7 +61,7 @@
 		{
 			if( $this->cache )
 			{
-				$_SESSION[ 'cache_query' ][] = $key;
+				$_SESSION[ 'cache_query' ][] = "- ". $key;
 				$this->cache->delete( $key, $timeout );
 			}
 		}
