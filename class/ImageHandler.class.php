@@ -12,6 +12,7 @@
 		public $force_regeneration = false;
 		public $add_borders = false;
 		public $jpeg_quality = 100; // int {0-100} - 100 means 100% quality
+		public $limit = 1600; // height / width limit (in pixels)
 		
 		function __construct( $file, $width = 0, $height = 0 )
 		{
@@ -21,6 +22,13 @@
 			$this->file = $file;
 			$this->width = $width;
 			$this->height = $height;
+			
+			// max height / width limit
+			if( $this->width > $this->limit )
+				$this->width = $this->limit;
+				
+			if( $this->height > $this->limit )
+				$this->height = $this->limit;
 			
 			$uri = explode( '/', $file );
 			$this->filename = $uri[ count( $uri ) - 1 ];

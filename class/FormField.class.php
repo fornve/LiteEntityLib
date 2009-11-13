@@ -7,19 +7,26 @@
 			$this->label = $label;
 			$this->type = $type;
 
+			/*
+			 * Problem with checkboxes? Set $form->fields[ 'something' ]->checked after if( $form->posted ) {}
+			 */
 			if( $type == 'checkbox' )
 			{
 				$this->value = $default;
-				$this->SetCheckbox( $default );
+				$this->SetCheckbox();
 			}
 			else
 			{
 				$input = FormField::GetInput( $name );
 				
 				if( $input !== null )
+				{
 					$this->value = $input;
+				}
 				else
+				{
 					$this->value = $default;
+				}
 			}
 		}
 
@@ -37,13 +44,17 @@
 		{
 			if( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' )
 			{
-				if( $_POST[ $this->name ] )
+				if( $_POST[ $this->name ] == $this->value )
+				{
 					$this->checked = 'checked';
+				}
 			}
 			else
 			{
-				if( $_GET[ $this->name ] )
+				if( $_GET[ $this->name ] == $this->value )
+				{
 					$this->checked = 'checked';
+				}
 			}
 		}
 
