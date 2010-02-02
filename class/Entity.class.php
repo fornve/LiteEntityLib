@@ -7,7 +7,7 @@
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
  * @version 1.3
- @License GPL v3
+ * @License GPL v3
  */
 
 class Entity
@@ -189,7 +189,6 @@ class Entity
 	 * Returns array of objects type of entity
 	 */	function TypeCollection( $type )
 	{
-
 		if( !in_array( $type, $this->schema ) )
 			return false;
 
@@ -227,7 +226,7 @@ class Entity
 	}
 
 	/**
-	 *
+	 * Returns DAO object of first result (row) in given query
 	 * @param string $query
 	 * @param mixed $arguments
 	 * @param string $class
@@ -393,8 +392,10 @@ class Entity
 
 			foreach ( $array as $key => $value )
 			{
-				if( !is_numeric( $key ) )	
+				if( !is_numeric( $key ) )
+				{
 					$object->$key = $value;
+				}
 			}
 		}
 
@@ -453,7 +454,7 @@ class Entity
 	}
 
 	/**
-	 *
+	 * Injects escaped arguments into query
 	 * @param string $query
 	 * @param mixed $arguments
 	 * @return string
@@ -492,6 +493,9 @@ class Entity
 		return $new_query;
 	}
 
+	/*
+	 * Performs argument escape
+	 */
 	private function Escape( $string )
 	{
 		if( DB_TYPE == 'mysql' )
@@ -500,16 +504,20 @@ class Entity
 			return $this->db->escapeString( $string );
 	}
 
-	// frees result after multi query
+	/*
+	 * Frees result after multi query
+	 */
 	private function freeResult()
 	{
 		do
 		{
-			/* store first result set */
-			if ($result = $this->db->store_result()) {
+			// store first result set
+			if ($result = $this->db->store_result()) 
+			{
 				$result->free();
 			}
-			/* print divider */
+			
+			// print divider
 			$this->db->more_results();
 		}
 		while ( $this->db->next_result() );
