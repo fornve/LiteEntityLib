@@ -6,7 +6,7 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.3
+ * @version 1.4-build
  * @License GPL v3
  */
 
@@ -19,10 +19,17 @@ class Entity
 	public $db_query_counter = 0;
 	protected static $__CLASS__ = __CLASS__;
 	protected $schema = array();
+	protected $table_name = null;
+	protected $id_name = 'id';
 
 	function __construct()
 	{
 		$this->db = Entity::Instance();
+		
+		if( !$this->table_name )
+		{
+			$this->table_name = strtolower( get_class( $this ) );
+		}
 	}
 
 	public static function &Instance()
@@ -50,7 +57,7 @@ class Entity
 				break;
 			}
 			default:
-				die( 'Configuration error. Database unknown.' );	
+				die( 'Configuration error. Database unknown.' );
 		}
 
 		if( !$db )
@@ -174,27 +181,52 @@ class Entity
 		{
 			$class = new $class;
 
-			if( $class->schema )
+			if( $class->GetSchema() )
+			{
 				$this->result = Entity::Stripslashes( $this->result, $class->schema );
+			}
 		}
 
 		if( isset( $this->result ) )
 			return $this->result;
 	}
 
+	/*
+	 * Builds DAO schema
+	 */
+	function BuildSchema()
+	{
+		$query = "DESC {$this->table_name}";
+	
+		$result = $this->db->query( $query );
+		$objects = $this->BuildResult( $result, 'stdClass' );
+
+		if( $objects ) foreach( $objects as $object )
+		{
+			if( strlen( $object->Field ) > 0 )
+			{
+				$schema[] = $object->Field;
+			}
+		}
+		
+		return $this->schema = $schema;
+	}
+	
+
 	/**
 	 * Retrieve column group results
 	 * @param int $column
 	 * @return object
 	 * Returns array of objects type of entity
-	 */	function TypeCollection( $type )
+	 */	
+	function TypeCollection( $type )
 	{
-		if( !in_array( $type, $this->schema ) )
+		if( !in_array( $type, $this->GetSchema() ) )
 			return false;
 
 		$table_name = strtolower( get_class( $this ) );
 		$query = "SELECT {$type} FROM {$table_name} GROUP BY {$type}";
-		return $this->Collection( $query, null, 'stdClass' );
+		return $this->Collection( $query, null, 'Entity' );
 	}
 
 	/**
@@ -210,15 +242,13 @@ class Entity
 		if( is_int( $id ) )
 		{
 			$object = new $class;
-			$table = strtolower( $class );
+			$object->BuildSchema();
 			$entity = new Entity();
-			$query = "SELECT * FROM `{$table}` WHERE `{$id}` = ? LIMIT 1";
-			$result = $entity->GetFirstResult( $query, $id, $class );
+			$query = "SELECT * FROM `{$object->table_name}` WHERE `{$id}` = ? LIMIT 1";
+			$object = $entity->GetFirstResult( $query, $id, $class );
 
-			if( $result ) foreach( $result as $key => $value )
-			{
-				$object->$key = $value;
-			}
+			if( !$object )
+				return null;
 
 			return $object;
 		}
@@ -251,9 +281,9 @@ class Entity
 
 	function Save()
 	{
-		$table = strtolower( get_class( $this ) );
-
-		$id = $this->schema[ 0 ];
+		$table = $this->table_name;
+		$id = $this->id_name;
+		$this->GetSchema(); // force to generate schema
 
 		if( !$this->$id )
 			$this->$id = $this->Create( $table );
@@ -278,7 +308,7 @@ class Entity
 			}
 		}
 
-		$query .= " WHERE {$this->schema[0]} = ?";
+		$query .= " WHERE {$this->id_name} = ?";
 		$arguments[] = $this->{$id};
 
 		$this->Query( $query, $arguments );
@@ -293,17 +323,21 @@ class Entity
 	 */
 	function Create( $table, $id_value = null )
 	{
-		$id = $this->schema[ 0 ];
+		$this->GetSchema(); 
+		$id = & $this->id_name;
 		$column = $this->schema[ 1 ];
 
 		if( $id_value )
-			$query = "INSERT INTO `{$table}` ( `{$id}`, `{$column}` ) VALUES ( {$id_value}, 0 )";
+		{
+			$query = "INSERT INTO `{$this->table_name}` ( `{$this->id_name}`, `{$column}` ) VALUES ( {$id_value}, 0 )";
+		}
 		else
-			$query = "INSERT INTO `{$table}` ( `{$column}` ) VALUES ( 0 )";
-
+		{
+			$query = "INSERT INTO `{$this->table_name}` ( `{$column}` ) VALUES ( 0 )";
+		}
 
 		$this->Query( $query );
-		$result = $this->GetFirstResult( "SELECT {$id} FROM `{$table}` WHERE `{$column}` = 0 ORDER BY `{$id}` DESC LIMIT 1" );
+		$result = $this->GetFirstResult( "SELECT {$this->id_name} FROM `{$this->table_name}` WHERE `{$column}` = 0 ORDER BY `{$this->id_name}` DESC LIMIT 1", null, get_class( $this ) );
 		return $result->$id;
 	}
 
@@ -328,8 +362,8 @@ class Entity
 	function Delete()
 	{
 		$this->PreDelete();
-		$table = strtolower( get_class( $this ) );
-		$query = "DELETE FROM `{$table}` WHERE id = ?";
+
+		$query = "DELETE FROM `{$this->table_name}` WHERE {$this->id_name} = ?";
 		$this->query( $query, $this->id );
 	}
 
@@ -342,8 +376,8 @@ class Entity
 		if( !$class )
 			die( "Entity::GetAll - class name cannot be null." );
 
-		$table = strtolower( $class );
-		$query = "SELECT * from `{$table}`";
+		$object = new $class;
+		$query = "SELECT * from `{$object->table_name}`";
 		$entity = new Entity();
 		return $entity->Collection( $query, null, $class );
 	}
@@ -354,7 +388,7 @@ class Entity
 	 */
 	public function SetProperties( $method = INPUT_POST )
 	{
-		$input = Common::Inputs( $this->schema, $method );
+		$input = Common::Inputs( $this->GetSchema(), $method );
 
 		foreach( $this->schema as $property )
 		{
@@ -368,12 +402,17 @@ class Entity
 	 */
 	public function GetSchema()
 	{
+		if( count( $this->schema ) < 1 )
+		{
+			$this->BuildSchema();
+		}
+	
 		return $this->schema;
 	}
 
 	public function InSchema( $key )
 	{
-		if( $this->schema ) foreach( $this->schema as $schema_key )
+		if( $this->GetSchema() ) foreach( $this->schema as $schema_key )
 		{
 			if( $key == $schema_key )
 				return true;
@@ -421,7 +460,7 @@ class Entity
 	{
 		if( DB_TYPE == 'mysql' )
 		{
-			while( $row = mysqli_fetch_object( $result, $class ) )
+			if( $result ) while( $row = mysqli_fetch_object( $result, $class ) )
 			{
 				$this->result[] = $row;
 			}
@@ -434,6 +473,7 @@ class Entity
 			}
 		}
 
+		return $this->result;
 	}
 
 	/**
