@@ -6,7 +6,7 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.4-build
+ * @version 1.4-beta
  * @License GPL v3
  */
 
@@ -237,16 +237,16 @@ class Entity
 	 * @return object
 	 * Returns object type of entity
 	 */
-	static function Retrieve( $id, $id_name = 'id', $class = __CLASS__ )
+	static function Retrieve( $id, $class = __CLASS__, $id_name = 'id' )
 	{
-		if( is_int( $id ) )
+		if( $id )
 		{
 			$object = new $class;
 			$object->BuildSchema();
 			$entity = new Entity();
-			$query = "SELECT * FROM `{$object->table_name}` WHERE `{$id}` = ? LIMIT 1";
+			$query = "SELECT * FROM `{$object->table_name}` WHERE `{$id_name}` = ? LIMIT 1";
 			$object = $entity->GetFirstResult( $query, $id, $class );
-
+			
 			if( !$object )
 				return null;
 
