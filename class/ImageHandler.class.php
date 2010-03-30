@@ -9,7 +9,7 @@
 		public $cache_prefix = 'cache-';
 		public $width = 0;
 		public $height = 0;
-		public $force_regeneration = false;
+		public $force_regeneration = true;
 		public $add_borders = false;
 		public $jpeg_quality = 100; // int {0-100} - 100 means 100% quality
 		public $limit = 1600; // height / width limit (in pixels)
@@ -22,6 +22,7 @@
 			$this->file = $file;
 			$this->width = $width;
 			$this->height = $height;
+			$this->DetectImageMimeType();
 			
 			// max height / width limit
 			if( $this->width > $this->limit )
@@ -44,6 +45,16 @@
 		private function Load( $file )
 		{
 			return imagecreatefromstring( file_get_contents( $file ) );
+		}
+
+		private function DetectImageMimeType()
+		{
+			$valid_extensions = array( 'jpg' => 'jpeg', 'jpeg' => 'jpeg', 'png' => 'png' );
+			
+			$filename = explode( '.',strtolower(  basename( $this->file ) ) );
+			$extension = $filename[ count( $filename ) - 1 ];
+			
+			$this->file_type = $valid_extensions[ $extension ];
 		}
 
 		private function GetImageDimensions( $file )
@@ -84,8 +95,18 @@
 			}
 
 			$destination_image = imagecreatetruecolor( $this->width, $this->height );
+			
 			imagesavealpha( $destination_image, true );
-			$background = imagecolorallocatealpha( $destination_image, 255, 255, 255, 0 );
+			
+			if( $this->file_type == 'jpeg' )
+			{
+				$background = imagecolorallocatealpha( $destination_image, 255, 255, 255, 0 );
+			}
+			elseif( $this->file_type == 'png' )
+			{
+				$background = imagecolorallocatealpha( $destination_image, 255, 255, 255, 127 );
+			}
+			
 			imagefill( $destination_image, 0, 0, $background );
 
 			imagecopyresampled( $destination_image, $this->image, $xpos, $ypos, 0, 0, $width, $height, $this->source_width, $this->source_height );
@@ -141,9 +162,15 @@
 				$image = $this->Resize( $this->image );
 			else
 				$image = $this->image;
-				
-
-			imagejpeg( $image, $this->cache_file, $this->jpeg_quality );
+			
+			if( $this->file_type == 'jpeg' )
+			{
+				imagejpeg( $image, $this->cache_file, $this->jpeg_quality );
+			}
+			elseif( $this->file_type == 'png' )
+			{
+				imagepng( $image, $this->cache_file, 9 );
+			}
 		}
 
 		private function GetSourceDimensions()
@@ -158,7 +185,7 @@
 		{
 			$this->GetCacheFilename();
 
-			if( !file_exists( $this->cache_file ) )
+			if( !file_exists( $this->cache_file ) || $this->force_regeneration )
 				$this->GenerateCache();
 			//else
 			//	error_log( "Read from cache: {$this->filename}" );
@@ -176,7 +203,7 @@
 		public function Output()
 		{
 			$this->Process();
-			header( "Content-Type: image/jpeg" );
+			header( "Content-Type: image/{$this->file_type}" );
 			header( "Pragma: hack" );
 			header( "Expires: " . gmdate("D, d M Y H:i:s", time() + 18144000 ) . " GMT" );
 			header( "Last-Modified: " . gmdate("D, d M Y H:i:s", time() ) . " GMT" );
