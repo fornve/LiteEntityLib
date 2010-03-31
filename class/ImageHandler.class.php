@@ -9,7 +9,7 @@
 		public $cache_prefix = 'cache-';
 		public $width = 0;
 		public $height = 0;
-		public $force_regeneration = true;
+		public $force_regeneration = false;
 		public $add_borders = false;
 		public $jpeg_quality = 100; // int {0-100} - 100 means 100% quality
 		public $limit = 1600; // height / width limit (in pixels)
@@ -79,7 +79,7 @@
 			$height = $this->height;
 
 			if( !$this->width || !$this->source_height ) // check if image sizes are > than 0
-				return false;
+				return $this->file;
 
 			if( $this->height / $this->width < $this->source_width / $this->source_height ) // fit to width
 			{
@@ -156,12 +156,18 @@
 				unlink( $cache_filename );
 			}
 
-			if( $this->add_borders )
+			if( $this->width && $this->add_borders )
+			{
 				$image = $this->AddBorders();
-			elseif( $this->width or $this->height )
+			}
+			elseif( $this->width || $this->height )
+			{
 				$image = $this->Resize( $this->image );
+			}
 			else
+			{
 				$image = $this->image;
+			}
 			
 			if( $this->file_type == 'jpeg' )
 			{
