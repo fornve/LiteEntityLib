@@ -9,7 +9,7 @@
 		public $cache_prefix = 'cache-';
 		public $width = 0;
 		public $height = 0;
-		public $force_regeneration = false;
+		public $force_regeneration = true;
 		public $add_borders = false;
 		public $jpeg_quality = 100; // int {0-100} - 100 means 100% quality
 		public $limit = 1600; // height / width limit (in pixels)
@@ -23,13 +23,6 @@
 			$this->width = $width;
 			$this->height = $height;
 			$this->DetectImageMimeType();
-			
-			// max height / width limit
-			if( $this->width > $this->limit )
-				$this->width = $this->limit;
-				
-			if( $this->height > $this->limit )
-				$this->height = $this->limit;
 			
 			$uri = explode( '/', $file );
 			$this->filename = $uri[ count( $uri ) - 1 ];
@@ -189,7 +182,7 @@
 			$this->source_ratio = $dimensions[ 'ratio' ];
 			
 			if( !$this->width )
-			{
+			{	
 				$this->width = $this->source_width;
 			}
 			
@@ -220,6 +213,17 @@
 
 		public function Output()
 		{
+			// max height / width limit
+			if( $this->width > $this->limit )
+			{
+				$this->width = $this->limit;
+			}
+
+			if( $this->height > $this->limit )
+			{
+				$this->height = $this->limit;
+			}
+
 			$this->Process();
 			header( "Content-Type: image/{$this->file_type}" );
 			header( "Pragma: hack" );
