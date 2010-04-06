@@ -81,7 +81,7 @@
 			if( !$this->width || !$this->source_height ) // check if image sizes are > than 0
 				return $this->file;
 
-			if( $this->height / $this->width < $this->source_width / $this->source_height ) // fit to width
+			if( $this->source_width / $this->source_height > 1 && $width / $height >= 1  ) // fit to width
 			{
 				$resize_ratio = $this->width / $this->source_width;
 				$ypos = (int)ceil( ( $this->height - $this->source_height * $resize_ratio ) / 2 );
@@ -93,7 +93,7 @@
 				$xpos = (int)ceil( ( $this->width - $this->source_width * $resize_ratio ) / 2 );
 				$width = (int)floor( $this->source_width * $resize_ratio );
 			}
-
+			//var_dump($this, $width, $height);exit;
 			$destination_image = imagecreatetruecolor( $this->width, $this->height );
 			
 			imagesavealpha( $destination_image, true );
@@ -185,6 +185,16 @@
 			$this->source_width = $dimensions[ 'width' ];
 			$this->source_height = $dimensions[ 'height' ];
 			$this->source_ratio = $dimensions[ 'ratio' ];
+			
+			if( !$this->width )
+			{
+				$this->width = $this->source_width;
+			}
+			
+			if( !$this->height )
+			{
+				$this->height = $this->source_height;
+			}
 		}
 
 		private function Process()
