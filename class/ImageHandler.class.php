@@ -146,7 +146,9 @@
 			$this->cache_file = "{$this->cache_root}/{$this->cache_path}/{$this->cache_filename}";
 
 			if( !file_exists( $this->cache_root .'/'. $this->cache_path ) )
-				mkdir( $this->cache_root .'/'. $this->cache_path );
+			{
+				mkdir( $this->cache_root .'/'. $this->cache_path, 0700, true );
+			}
 		}
 
 		private function GenerateCache()
