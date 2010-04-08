@@ -6,10 +6,12 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.4-beta
+ * @version 1.5-
  * @License GPL v3
  */
-
+	/*
+	* 1.5 - ORM::has_many
+	*/
 class Entity
 {
 	private static $dblink;
@@ -21,6 +23,8 @@ class Entity
 	protected $schema = array();
 	protected $table_name = null;
 	protected $id_name = 'id';
+	protected $has_many = array();
+	protected $has_one = array();
 
 	function __construct()
 	{
@@ -237,11 +241,11 @@ class Entity
 	 * @return object
 	 * Returns object type of entity
 	 */
-	static function Retrieve( $id, $class = __CLASS__, $id_name = 'id' )
+	static function Retrieve( $id, $class, $id_name = 'id' )
 	{
 		if( $id )
 		{
-			$object = new $class;
+			$object = new $class();
 			$object->BuildSchema();
 			$entity = new Entity();
 			$query = "SELECT * FROM `{$object->table_name}` WHERE `{$id_name}` = ? LIMIT 1";
@@ -250,9 +254,37 @@ class Entity
 			if( !$object )
 				return null;
 
+			if( count( $object->has_many ) ) foreach( $object->has_many as $child )
+			{
+				$child_name = strtolower( self::GetPlural( $child ) );
+				$child_object = new $child();
+				$object->$child_name = $child_object->ChildCollection( $class, $object->id );
+			}
+
+			if( count( $object->has_one ) ) foreach( $object->has_one as $child )
+			{
+				$child_object = new $child();
+				$child_name = strtolower( $child );
+				$object->$child_name = $child->Retrieve( $this->$child );
+			}
+
 			return $object;
 		}
 		
+	}
+
+	/**
+	 * Gets kids collection
+	 * @param	string	$child_class		Child class name
+	 * @param	string	$parent_class		Parent class name
+	 * @param	int		$parent_id			Parent id
+	 * @return	array						Returns array of objects
+	 */
+	private final function ChildCollection( $parent_class, $parent_id )
+	{
+		$query = "SELECT * FROM `{$this->table_name}` WHERE `". strtolower( $parent_class ) ."` = ?";
+		$entity = new Entity();
+		return $entity->Collection( $query, array( $parent_id ), get_class( $this ) );
 	}
 
 	/**
@@ -574,6 +606,24 @@ class Entity
 		return $result;
 	}
 
+	function GetPlural( $str )
+	{
+		if (preg_match('/[sxz]$/', $str) OR preg_match('/[^aeioudgkprt]h$/', $str))
+		{
+			$str .= 'es';
+		}
+		elseif (preg_match('/[^aeiou]y$/', $str))
+		{
+			// Change "y" to "ies"
+			$str = substr_replace($str, 'ies', -1);
+		}
+		else
+		{
+			$str .= 's';
+		}
+
+		return $str;  
+	}
 	/**
 	 * Email error detais to administrator
 	 * @param mixed $arguments 
