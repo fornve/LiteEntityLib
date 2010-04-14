@@ -9,7 +9,7 @@
 		public $cache_prefix = 'cache-';
 		public $width = 0;
 		public $height = 0;
-		public $force_regeneration = true;
+		public $force_regeneration = false;
 		public $add_borders = false;
 		public $jpeg_quality = 100; // int {0-100} - 100 means 100% quality
 		public $limit = 1600; // height / width limit (in pixels)
