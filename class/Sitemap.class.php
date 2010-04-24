@@ -13,7 +13,7 @@
 
 		function GenerateXML()
 		{
-			$xmldom = new DomDocument( $this->version, $this->encoding ) 
+			$xmldom = new DomDocument( $this->version, $this->encoding );
 			$urlset = $xmldom->createElement( 'urlset' );
 			$urlset->setAttribute( 'xmlns', $this->encoding );
 		
