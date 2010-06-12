@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @package framework
  * @subpackage entity
@@ -20,6 +19,7 @@ class Entity
 	protected $multi_query = false;
 	public $db_query_counter = 0;
 	protected static $__CLASS__ = __CLASS__;
+	protected static $instance = null;
 	protected $schema = array();
 	protected $table_name = null;
 	protected $id_name = 'id';
@@ -28,7 +28,7 @@ class Entity
 
 	function __construct()
 	{
-		$this->db = Entity::Instance();
+		$this->db = Entity::getDB();
 
 		if( !$this->table_name )
 		{
@@ -36,7 +36,7 @@ class Entity
 		}
 	}
 
-	public static function &Instance()
+	public static function &getDB()
 	{
 		if( !is_object( self::$dblink ) )
 		{
@@ -44,6 +44,16 @@ class Entity
 		}
 
 		return self::$dblink;
+	}
+
+	public static function &getInstance()
+	{
+		if( !is_object( self::$instance ) )
+		{
+			self::$instance = new Entity();
+		}
+		
+		return self::$instance;
 	}
 
 	function Connect()
@@ -85,7 +95,7 @@ class Entity
 	 */
 	function Query( $query, $arguments = null )
 	{
-		if( DB_TABLE_PREFIX )
+		if( defined( 'DB_TABLE_PREFIX' ) && DB_TABLE_PREFIX )
 			$query = $this->Prefix( $query );
 
 		$query = $this->Arguments( $query, $arguments );
@@ -191,13 +201,15 @@ class Entity
 		$result = $this->db->query( $query );
 		$objects = $this->BuildResult( $result, 'stdClass' );
 
-		if( $objects ) foreach( $objects as $object )
+		if( $objects ) foreach( $objects as &$object )
 		{
 			if( strlen( $object->Field ) > 0 )
 			{
 				$schema[] = $object->Field;
 			}
 		}
+
+		unset( $query, $result, $objects );
 
 		return $this->schema = $schema;
 	}
@@ -233,21 +245,21 @@ class Entity
 		{
 			$object = new $class();
 			$object->BuildSchema();
-			$entity = new Entity();
+			$entity = Entity::getInstance();
 			$query = "SELECT * FROM `{$object->table_name}` WHERE `{$id_name}` = ? LIMIT 1";
 			$object = $entity->GetFirstResult( $query, $id, $class );
 
 			if( !$object )
 				return null;
 
-			if( count( $object->has_many ) ) foreach( $object->has_many as $child )
+			if( count( $object->has_many ) ) foreach( $object->has_many as &$child )
 			{
 				$child_name = strtolower( self::GetPlural( $child ) );
 				$child_object = new $child();
 				$object->$child_name = $child_object->ChildCollection( $class, $object->id );
 			}
 
-			if( count( $object->has_one ) ) foreach( $object->has_one as $child )
+			if( count( $object->has_one ) ) foreach( $object->has_one as &$child )
 			{
 				$child_object = new $child();
 				$child_name = strtolower( $child );
@@ -269,7 +281,7 @@ class Entity
 	private final function ChildCollection( $parent_class, $parent_id )
 	{
 		$query = "SELECT * FROM `{$this->table_name}` WHERE `". strtolower( $parent_class ) ."` = ?";
-		$entity = new Entity();
+		$entity = Entity::getInstance();
 		return $entity->Collection( $query, array( $parent_id ), get_class( $this ) );
 	}
 
@@ -285,10 +297,10 @@ class Entity
 		//$object_name = get_class( $this );
 		$object = new $class;
 		$table = strtolower( $class );
-		$entity = new Entity();
+		$entity = Entity::getInstance();
 		$result = $object->GetFirstResult( $query, $arguments );
 
-		if( $result ) foreach( $result as $key => $value )
+		if( $result ) foreach( $result as $key => &$value )
 		{
 			$object->$key = $value;
 			return $object;
@@ -308,7 +320,7 @@ class Entity
 
 		$query = "UPDATE `{$table}` SET ";
 
-		foreach( $this->schema as $property )
+		foreach( $this->schema as &$property )
 		{
 			if( $property != $this->schema[ 0 ] )
 			{
@@ -371,9 +383,12 @@ class Entity
 		if( $query )
 			$this->Collection( $query, $arguments, $class );
 
-		return $this->result[ 0 ];
+		if( isset( $this->result ) && isset( $this->result[ 0 ] ) ) 
+		{
+			return $this->result[ 0 ];
+		}
 	}
-
+	
 	function PreDelete() {}
 	function FlushCache() {}
 
@@ -396,7 +411,7 @@ class Entity
 
 		$object = new $class;
 		$query = "SELECT * from `{$object->table_name}` ORDER BY `{$object->id_name}`";
-		$entity = new Entity();
+		$entity = Entity::getInstance();
 		return $entity->Collection( $query, null, $class );
 	}
 
@@ -408,7 +423,7 @@ class Entity
 	{
 		$input = Common::Inputs( $this->GetSchema(), $method );
 
-		foreach( $this->schema as $property )
+		foreach( $this->schema as &$property )
 		{
 			$this->$property = $input->$property;
 		}
@@ -430,7 +445,7 @@ class Entity
 
 	public function InSchema( $key )
 	{
-		if( $this->GetSchema() ) foreach( $this->schema as $schema_key )
+		if( $this->GetSchema() ) foreach( $this->schema as &$schema_key )
 		{
 			if( $key == $schema_key )
 				return true;
@@ -447,7 +462,7 @@ class Entity
 		{
 			$object = new $class();
 
-			foreach ( $array as $key => $value )
+			foreach ( $array as $key => &$value )
 			{
 				if( !is_numeric( $key ) )
 				{
@@ -491,7 +506,10 @@ class Entity
 			}
 		}
 
-		return $this->result;
+		if( isset( $this->result ) )
+		{ 
+			return $this->result;
+		}
 	}
 
 	/**
@@ -529,7 +547,7 @@ class Entity
 
 		$new_query = '';
 
-		if( count( $arguments ) ) foreach( $arguments as $argument )
+		if( count( $arguments ) ) foreach( $arguments as &$argument )
 		{
 			if( is_object( $argument ) )
 			{
@@ -583,10 +601,10 @@ class Entity
 
 	function Stripslashes( $result, $schema )
 	{
-		foreach( $schema as $key )
+		foreach( $schema as &$key )
 		{
-			 $result[ 0 ]->$key = stripslashes( $result[ 0 ]->$key );
-
+			if( isset( $result[ 0 ]->$key ) )
+				$result[ 0 ]->$key = stripslashes( $result[ 0 ]->$key );
 		}
 
 		return $result;
@@ -594,14 +612,14 @@ class Entity
 
 	function GetPlural( $str )
 	{
-		if (preg_match('/[sxz]$/', $str) OR preg_match('/[^aeioudgkprt]h$/', $str))
+		if( preg_match( '/[sxz]$/', $str ) OR preg_match( '/[^aeioudgkprt]h$/', $str ) )
 		{
 			$str .= 'es';
 		}
-		elseif (preg_match('/[^aeiou]y$/', $str))
+		elseif( preg_match( '/[^aeiou]y$/', $str ) )
 		{
 			// Change "y" to "ies"
-			$str = substr_replace($str, 'ies', -1);
+			$str = substr_replace( $str, 'ies', -1 );
 		}
 		else
 		{

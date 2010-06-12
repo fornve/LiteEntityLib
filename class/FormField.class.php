@@ -18,7 +18,7 @@
 			else
 			{
 				$input = FormField::GetInput( $name );
-				
+
 				if( $input !== null )
 				{
 					$this->value = $input;
@@ -135,7 +135,7 @@
 				return false;
 
 			$query = "SELECT * FROM `{$table}` WHERE `{$column}` = ?";
-			$entity = new Entity();
+			$entity = Entity::getInstance();
 
 			if( $entity->GetFirstResult( $query, $this->value ) )
 			{
@@ -152,7 +152,7 @@
 				return false;
 
 			$query = "SELECT * FROM `{$table}` WHERE `{$column}` = ?";
-			$entity = new Entity();
+			$entity = Entity::getInstance();
 
 			if( !$entity->GetFirstResult( $query, $this->value ) )
 			{

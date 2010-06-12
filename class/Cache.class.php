@@ -8,8 +8,19 @@
 	 */
 	class Cache
 	{
-		private $cache = null;
-		
+		protected static $cache = null;
+		protected static $instance = null;
+
+		public static function &getInstance()
+		{
+			if( !self::$instance )
+			{
+				self::$instance = new Cache();
+			}
+			
+			return self::$instance;
+		}
+
 		function __construct()
 		{
 			switch( CACHE_TYPE )
@@ -19,11 +30,12 @@
 					if( !class_exists( 'Memcache' ) )
 						return false;
 
-					$this->cache = new Memcache();
-					
-					if( !$this->cache->connect( CACHE_HOST, (int)CACHE_PORT ) )
-						$this->cache = null;
-						
+					if( !self::$cache )
+						self::$cache = new Memcache();
+
+					if( !self::$cache->connect( CACHE_HOST, (int)CACHE_PORT ) )
+						self::$cache = null;
+
 					break;
 				}
 
@@ -35,40 +47,45 @@
 
 		function __destruct()
 		{
-			$this->close();
+			//$this->close();
 		}
 
 		function set( $key, $var , $flag = null, $expire = null )
 		{
-			if( $this->cache )
+			if( self::$cache )
 			{
-				$_SESSION[ 'cache_query' ][] = "+ ". $key;
-				$this->cache->set( $key, $var, $flag, $expire );
+				if( defined( 'PRODUCTION' ) && !PRODUCTION )
+					$_SESSION[ 'cache_query' ][] = "+ ". $key;
+
+				self::$cache->set( $key, $var, $flag, $expire );
 			}
 		}
 
 		function get( $key, $flags = null )
 		{
-				
-			if( $this->cache )
+			if( self::$cache )
 			{
-				$_SESSION[ 'cache_query' ][] = "= ". $key;
-				return $this->cache->get( $key, $flags );
+				if( defined( 'PRODUCTION' ) && !PRODUCTION )
+					$_SESSION[ 'cache_query' ][] = "= ". $key;
+
+				return self::$cache->get( $key, $flags );
 			}
 		}
 
 		function delete( $key, $timeout = null )
 		{
-			if( $this->cache )
+			if( self::$cache )
 			{
-				$_SESSION[ 'cache_query' ][] = "- ". $key;
-				$this->cache->delete( $key, $timeout );
+				if( defined( 'PRODUCTION' ) && !PRODUCTION )
+					$_SESSION[ 'cache_query' ][] = "- ". $key;
+
+				self::$cache->delete( $key, $timeout );
 			}
 		}
 
 		function close()
 		{
-			if( $this->cache )
-				return $this->cache->close();
+			if( self::$cache )
+				return self::$cache->close();
 		}
 	}
