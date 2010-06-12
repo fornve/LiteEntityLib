@@ -6,7 +6,7 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.5-
+ * @version 1.5.1
  * @License GPL v3
  */
 	/*
@@ -29,7 +29,7 @@ class Entity
 	function __construct()
 	{
 		$this->db = Entity::Instance();
-		
+
 		if( !$this->table_name )
 		{
 			$this->table_name = strtolower( get_class( $this ) );
@@ -87,7 +87,7 @@ class Entity
 	{
 		if( DB_TABLE_PREFIX )
 			$query = $this->Prefix( $query );
-			
+
 		$query = $this->Arguments( $query, $arguments );
 
 		if( $this->multi_query )
@@ -108,14 +108,7 @@ class Entity
 		$this->query = $query;
 		$_SESSION[ 'entity_query' ][] = $query;
 
-		if( $this->db->errno && !PRODUCTION )
-		{
-			echo 'Database entity Collection error: ';
-			var_dump( $this );
-			var_dump( $arguments );
-			exit;
-		}
-		elseif( $this->db->errno )
+		if( $this->db->errno )
 		{
 			$this->Error( $this->db->errno, $arguments );
 		}
@@ -151,7 +144,7 @@ class Entity
 
 			$arguments[] = $limit;
 		}
-		
+
 		$query = $this->Prefix( $query );
 		$query = $this->Arguments( $query, $arguments );
 
@@ -168,15 +161,8 @@ class Entity
 
 		$this->error = $this->db->error;
 		$this->query = $query;
-		
-		if( $this->db->errno && !PRODUCTION )
-		{
-			echo 'Database entity Collection error: ';
-			var_dump( $this );
-			var_dump( $arguments );
-			exit;
-		}
-		elseif( $this->db->errno )
+
+		if( $this->db->errno )
 		{
 			$this->Error( $this->db->error, $arguments );
 		}
@@ -201,7 +187,7 @@ class Entity
 	function BuildSchema()
 	{
 		$query = "DESC {$this->table_name}";
-	
+
 		$result = $this->db->query( $query );
 		$objects = $this->BuildResult( $result, 'stdClass' );
 
@@ -212,17 +198,17 @@ class Entity
 				$schema[] = $object->Field;
 			}
 		}
-		
+
 		return $this->schema = $schema;
 	}
-	
+
 
 	/**
 	 * Retrieve column group results
 	 * @param int $column
 	 * @return object
 	 * Returns array of objects type of entity
-	 */	
+	 */
 	function TypeCollection( $type )
 	{
 		if( !in_array( $type, $this->GetSchema() ) )
@@ -250,7 +236,7 @@ class Entity
 			$entity = new Entity();
 			$query = "SELECT * FROM `{$object->table_name}` WHERE `{$id_name}` = ? LIMIT 1";
 			$object = $entity->GetFirstResult( $query, $id, $class );
-			
+
 			if( !$object )
 				return null;
 
@@ -270,7 +256,7 @@ class Entity
 
 			return $object;
 		}
-		
+
 	}
 
 	/**
@@ -330,7 +316,7 @@ class Entity
 					$query .= ', ';
 
 				$query .= " `{$property}` = ?";
-					
+
 				if( is_object( $this->$property ) )
 					$arguments[] = $this->$property->id;
 				else
@@ -355,7 +341,7 @@ class Entity
 	 */
 	function Create( $table, $id_value = null )
 	{
-		$this->GetSchema(); 
+		$this->GetSchema();
 		$id = & $this->id_name;
 		$column = $this->schema[ 1 ];
 
@@ -409,7 +395,7 @@ class Entity
 			die( "Entity::GetAll - class name cannot be null." );
 
 		$object = new $class;
-		$query = "SELECT * from `{$object->table_name}`";
+		$query = "SELECT * from `{$object->table_name}` ORDER BY `{$object->id_name}`";
 		$entity = new Entity();
 		return $entity->Collection( $query, null, $class );
 	}
@@ -438,7 +424,7 @@ class Entity
 		{
 			$this->BuildSchema();
 		}
-	
+
 		return $this->schema;
 	}
 
@@ -454,12 +440,12 @@ class Entity
 	/**
 	 * Converts array into object
 	 * @return object
-	 */ 
+	 */
 	public static function Array2Entity( $array, $class )
 	{
-		if( $array ) 
+		if( $array )
 		{
-			$object = new $class();	
+			$object = new $class();
 
 			foreach ( $array as $key => $value )
 			{
@@ -584,11 +570,11 @@ class Entity
 		do
 		{
 			// store first result set
-			if ($result = $this->db->store_result()) 
+			if ($result = $this->db->store_result())
 			{
 				$result->free();
 			}
-			
+
 			// print divider
 			$this->db->more_results();
 		}
@@ -622,30 +608,29 @@ class Entity
 			$str .= 's';
 		}
 
-		return $str;  
+		return $str;
 	}
 	/**
 	 * Email error detais to administrator
-	 * @param mixed $arguments 
+	 * @param db resource
+	 * @param mixed $arguments
 	 */
 	private function Error( $db, $arguments )
 	{
-		if( defined( PRODUCTION ) && defined( ADMIN_EMAIL ) )
+		if( defined( 'DEVELOPER_EMAIL' ) )
 		{
-			$break = "=================================================================";
-			$headers = "From: Entity crash bum bum at {". PROJECT_NAME ."}! <www@". PROJECT_NAME .">";
+			$headers = "From: Entity crash at {". PROJECT_NAME ."}! <". DEVELOPER_EMAIL .">";
 			$message = "Entity object: \n\n". var_export( $this, true ) ."\n\n{$break}\n\nArguments:\n\n".  var_export( $this, true ) ."\n\n{$break}\n\Database error:\n\n". var_export( $db, true ) ."\n\n{$break}\n\nServer:\n\n". var_export( $_SERVER, true ) ."\n\n{$break}\n\nPOST:\n\n". var_export( $_POST, true ) ."\n\n{$break}\n\nSession:\n\n". var_export( $_SESSION, true );
 
-			mail( ADMIN_EMAIL, 'Database entity Collection error', $message, $headers );
-		
-			header( "Location: /Error/Database" );
-			exit;
+			mail( DEVELOPER_EMAIL, 'Database entity Collection error', $message, $headers );
 		}
-		else
-		{
-			var_dump( $this->error, $this->query );
-		}
-		
-	}
 
+		$e = new Exception( $this->error );
+		$e->attributes = array(
+			'query' => $this->query,
+			'attributes' => $attributes
+		);
+
+		throw $e;
+	}
 }
