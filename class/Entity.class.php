@@ -201,6 +201,8 @@ class Entity
 		$result = $this->db->query( $query );
 		$objects = $this->BuildResult( $result, 'stdClass' );
 
+		$schema = array();
+
 		if( $objects ) foreach( $objects as &$object )
 		{
 			if( strlen( $object->Field ) > 0 )
@@ -319,6 +321,8 @@ class Entity
 			$this->$id = $this->Create( $table );
 
 		$query = "UPDATE `{$table}` SET ";
+
+		$notfirst = false;
 
 		foreach( $this->schema as &$property )
 		{
@@ -633,7 +637,7 @@ class Entity
 	 * @param db resource
 	 * @param mixed $arguments
 	 */
-	private function Error( $db, $arguments )
+	private function Error( $db, $attributes = null )
 	{
 		if( defined( 'DEVELOPER_EMAIL' ) )
 		{
