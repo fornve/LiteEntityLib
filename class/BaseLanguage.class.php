@@ -1,6 +1,8 @@
 <?php
 	class BaseLanguage
 	{
+		public $languageCode = null;
+		
 		public function __construct()
 		{
 			$base = DefaultLanguage::DefaultContent();
@@ -17,14 +19,23 @@
 				if( !$this->$key )
 					$this->$key = $value;
 				else
-					echo "Warning! Lang {$key} duplicated around line {$couner}.";
+				{
+					Filelog:Write( "Warning! Lang {$key} duplicated around line {$couner}." );
+				}
 			}
 		}
 
-		public function __get( $item )
+		function __get( $property )
 		{
-			if( !isset( $this->$item ) )
-				$this->$item = $item;
+			if( !isset( $this->$property ) )
+			{
+				FileLog::Write( "[LanguageError::StringNotFound]: {$property} [{$this->languageCode}]" );
+				return $property;
+			}
+			else
+			{
+				return $this->property;
+			}
 		}
 
 		public function _( $item )
