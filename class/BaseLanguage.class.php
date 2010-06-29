@@ -20,7 +20,7 @@
 					$this->$key = $value;
 				else
 				{
-					Filelog:Write( "Warning! Lang {$key} duplicated around line {$couner}." );
+					Filelog::Write( "Warning! Lang {$key} duplicated around line {$couner}." );
 				}
 			}
 		}
