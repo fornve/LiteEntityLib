@@ -29,7 +29,7 @@
 		{
 			if( !isset( $this->$property ) )
 			{
-				FileLog::Write( "[LanguageError::StringNotFound]: {$property} [{$this->languageCode}]" );
+				Filelog::Write( "[LanguageError::StringNotFound]: {$property} [{$this->languageCode}]" );
 				return $property;
 			}
 			else
