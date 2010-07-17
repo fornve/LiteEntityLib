@@ -52,7 +52,7 @@ class Entity
 		{
 			self::$instance = new Entity();
 		}
-		
+
 		return self::$instance;
 	}
 
@@ -387,12 +387,12 @@ class Entity
 		if( $query )
 			$this->Collection( $query, $arguments, $class );
 
-		if( isset( $this->result ) && isset( $this->result[ 0 ] ) ) 
+		if( isset( $this->result ) && isset( $this->result[ 0 ] ) )
 		{
 			return $this->result[ 0 ];
 		}
 	}
-	
+
 	function PreDelete() {}
 	function FlushCache() {}
 
@@ -511,7 +511,7 @@ class Entity
 		}
 
 		if( isset( $this->result ) )
-		{ 
+		{
 			return $this->result;
 		}
 	}
@@ -647,7 +647,7 @@ class Entity
 			mail( DEVELOPER_EMAIL, 'Database entity Collection error', $message, $headers );
 		}
 
-		$e = new Exception( $this->error );
+		$e = new EntityException( $this->error );
 		$e->attributes = array(
 			'query' => $this->query,
 			'attributes' => $attributes
