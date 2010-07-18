@@ -159,14 +159,16 @@ class Entity
 		$query = $this->Arguments( $query, $arguments );
 
 		unset( $this->result ); // for object reuse
+		$timer = microtime( true );
 		$result = $this->db->query( $query );
+		$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
 		$this->db_query_counter++;
 
 		if( $result )
 		{
 			$this->BuildResult( $result, $class );
 
-			$_SESSION[ 'entity_query' ][] = $query;
+			$_SESSION[ 'entity_query' ][] = "[{$timer}] ". $query;
 		}
 
 		$this->error = $this->db->error;
