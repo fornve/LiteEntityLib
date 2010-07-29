@@ -5,7 +5,7 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.5.1
+ * @version 1.5.1-1
  * @License GPL v3
  */
 	/*
@@ -198,7 +198,7 @@ class Entity
 	 */
 	function BuildSchema()
 	{
-		$query = "DESC {$this->table_name}";
+		$query = "DESC `{$this->table_name}`";
 
 		$result = $this->db->query( $query );
 		$objects = $this->BuildResult( $result, 'stdClass' );
@@ -320,7 +320,9 @@ class Entity
 		$this->GetSchema(); // force to generate schema
 
 		if( !$this->$id )
+		{
 			$this->$id = $this->Create( $table );
+		}
 
 		$query = "UPDATE `{$table}` SET ";
 
@@ -644,7 +646,13 @@ class Entity
 		if( defined( 'DEVELOPER_EMAIL' ) )
 		{
 			$headers = "From: Entity crash at {". PROJECT_NAME ."}! <". DEVELOPER_EMAIL .">";
-			$message = "Entity object: \n\n". var_export( $this, true ) ."\n\n{$break}\n\nArguments:\n\n".  var_export( $this, true ) ."\n\n{$break}\n\Database error:\n\n". var_export( $db, true ) ."\n\n{$break}\n\nServer:\n\n". var_export( $_SERVER, true ) ."\n\n{$break}\n\nPOST:\n\n". var_export( $_POST, true ) ."\n\n{$break}\n\nSession:\n\n". var_export( $_SESSION, true );
+			$message = "Entity object [". get_class( $this ) ."]: \n\n". var_export( $this, true ) ."\n\n{$break}\n\n".
+			"Arguments:\n\n".  var_export( $this, true ) ."\n\n{$break}\n".
+			"Database error:\n\n". var_export( $db, true ) ."\n\n{$break}\n\n".
+			"Backtrace:\n\n". var_export( debug_backtrace(), true ) ."\n\n{$break}\n\n".
+			"Server:\n\n". var_export( $_SERVER, true ) ."\n\n{$break}\n\n".
+			"POST:\n\n". var_export( $_POST, true ) ."\n\n{$break}\n\n".
+			"Session:\n\n". var_export( $_SESSION, true );
 
 			mail( DEVELOPER_EMAIL, 'Database entity Collection error', $message, $headers );
 		}
