@@ -5,7 +5,8 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.5.1-1
+ * @version 1.5.1-2 PostgreSQL port - tested with basic Retrieve
+ * @todo database specific drivers 
  * @License GPL v3
  */
 	/*
@@ -68,6 +69,12 @@ class Entity
 			case 'sqlite':
 			{
 				$db = new SQLite3( DB_FILE );
+				break;
+			}
+			case 'postgresql':
+			{
+				var_dump( "Connecting: ". DSN );
+				$db = pg_connect( DSN );
 				break;
 			}
 			default:
@@ -159,9 +166,21 @@ class Entity
 		$query = $this->Arguments( $query, $arguments );
 
 		unset( $this->result ); // for object reuse
+
 		$timer = microtime( true );
 		$result = $this->db->query( $query );
+
+		if( DB_TYPE == 'mysql' )
+		{
+			$result = $this->db->query( $query );
+		}
+		elseif( DB_TYPE == 'postgresql' )
+		{
+			$result = pg_query( $this->db, $query );
+		}
+
 		$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
+
 		$this->db_query_counter++;
 
 		if( $result )
@@ -198,9 +217,22 @@ class Entity
 	 */
 	function BuildSchema()
 	{
-		$query = "DESC `{$this->table_name}`";
+		if( $this->schema )
+		{
+			return $this->schema;
+		}
 
-		$result = $this->db->query( $query );
+		if( DB_TYPE == 'mysql' )
+		{
+			$query = "DESC `{$this->table_name}`";
+			$result = $this->db->query( $query );
+		}
+		elseif( DB_TYPE == 'postgresql' )
+		{
+			$query = "\d {$this->table_name}";
+			$result = pg_query( $this->db, $query );
+		}
+
 		$objects = $this->BuildResult( $result, 'stdClass' );
 
 		$schema = array();
@@ -250,7 +282,16 @@ class Entity
 			$object = new $class();
 			$object->BuildSchema();
 			$entity = Entity::getInstance();
-			$query = "SELECT * FROM `{$object->table_name}` WHERE `{$id_name}` = ? LIMIT 1";
+
+			if( DB_TYPE == 'postgresql' )
+			{
+				$query = "SELECT * FROM {$object->table_name} WHERE {$id_name} = ? LIMIT 1";
+			}
+			else
+			{
+				$query = "SELECT * FROM `{$object->table_name}` WHERE `{$id_name}` = ? LIMIT 1";
+			}
+
 			$object = $entity->GetFirstResult( $query, $id, $class );
 
 			if( !$object )
@@ -506,6 +547,13 @@ class Entity
 				$this->result[] = $row;
 			}
 		}
+		elseif( DB_TYPE == 'postgresql' )
+		{
+			if( $result ) while( $row = pg_fetch_object( $result, null, $class ) )
+			{
+				$this->result[] = $row;
+			}
+		}
 		else
 		{
 			while( $row = $result->fetchArray() )
@@ -583,9 +631,17 @@ class Entity
 	private function Escape( $string )
 	{
 		if( DB_TYPE == 'mysql' )
+		{
 			return $this->db->escape_string( $string );
+		}
+		elseif( DB_TYPE == 'postgresql' )
+		{
+			return pg_escape_string( $this->db, $string );
+		}
 		elseif( DB_TYPE == 'sqlite' )
+		{
 			return $this->db->escapeString( $string );
+		}
 	}
 
 	/*
