@@ -17,12 +17,15 @@
 
 		function Validate()
 		{
+			$error = 0;
+
 			if( !$this->posted )
 				return false;
 
 			if( $this->fields ) foreach( $this->fields as $field )
 			{
-				$error += count( $field->error );
+				if( isset( $field->error ) )
+					$error += count( $field->error );
 			}
 
 			if( $error > 0 )

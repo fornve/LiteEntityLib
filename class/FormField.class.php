@@ -1,6 +1,10 @@
 <?php
 	class FormField
 	{
+		public $value = null;
+		public $checked = null;
+		public $error = null;
+
 		function __construct( $name, $label, $type = 'text', $default = null )
 		{
 			$this->name = $name;
@@ -18,7 +22,7 @@
 			else
 			{
 				$input = FormField::GetInput( $name );
-				
+
 				if( $input !== null )
 				{
 					$this->value = $input;
@@ -44,14 +48,14 @@
 		{
 			if( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' )
 			{
-				if( $_POST[ $this->name ] == $this->value )
+				if( isset( $_POST[ $this->name ] ) && $_POST[ $this->name ] == $this->value )
 				{
 					$this->checked = 'checked';
 				}
 			}
 			else
 			{
-				if( $_GET[ $this->name ] == $this->value )
+				if( isset( $_GET[ $this->name ] ) && $_GET[ $this->name ] == $this->value )
 				{
 					$this->checked = 'checked';
 				}
@@ -135,7 +139,7 @@
 				return false;
 
 			$query = "SELECT * FROM `{$table}` WHERE `{$column}` = ?";
-			$entity = new Entity();
+			$entity = Entity::getInstance();
 
 			if( $entity->GetFirstResult( $query, $this->value ) )
 			{
@@ -152,7 +156,7 @@
 				return false;
 
 			$query = "SELECT * FROM `{$table}` WHERE `{$column}` = ?";
-			$entity = new Entity();
+			$entity = Entity::getInstance();
 
 			if( !$entity->GetFirstResult( $query, $this->value ) )
 			{
@@ -166,7 +170,7 @@
 
 		private function Checked( $error_text = "This field is required." )
 		{
-			if( $this->checked != 'checked' )
+			if( isset( $this->checked ) && $this->checked != 'checked' )
 			{
 				$this->error[] = $error_text;
 			}

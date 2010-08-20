@@ -13,7 +13,15 @@
 		public $add_borders = false;
 		public $jpeg_quality = 100; // int {0-100} - 100 means 100% quality
 		public $limit = 1600; // height / width limit (in pixels)
-		
+
+		/*
+		 * This method prepares all variables
+		 * Should not take any action
+		 * 
+		 * @param file string path/filename to original file
+		 * @param width int Output with in pixels
+		 * @param height int Output height in pixels
+		 */
 		function __construct( $file, $width = 0, $height = 0 )
 		{
 			if( !file_exists( $file ) )
@@ -28,16 +36,22 @@
 			$this->filename = $uri[ count( $uri ) - 1 ];
 			unset( $uri[ count( $uri ) - 1 ] );
 			$this->path = '/'. implode( '/', $uri );
-
-			$this->image = $this->Load( $file );
-			$this->GetSourceDimensions();
 		}
 
 		// image manipulation methods
 
 		private function Load( $file )
 		{
-			return imagecreatefromstring( file_get_contents( $file ) );
+			$image = imagecreatefromstring( file_get_contents( $file ) );
+			
+			if( !$image )
+			{
+				error_log( "[ImageHandler Error]: Image {$file} not loaded." );
+				exit;
+			}
+			
+			error_log("{$file} loaded.");
+			return $image;
 		}
 
 		private function DetectImageMimeType()
@@ -53,9 +67,13 @@
 		private function GetImageDimensions( $file )
 		{
 			if( $this->file != $file )
+			{
 				$image = $this->Load( $file );
+			}
 			else
+			{
 				$image = $this->image;
+			}
 
 			$dimensions[ 'width' ] = imagesx ( $image );
 			$dimensions[ 'height' ] = imagesy ( $image );
@@ -132,8 +150,10 @@
 		private function GetCacheFilename()
 		{
 			if( is_array( $this->options ) )
+			{
 				$options = implode( '-'. $this->options ) .'-';
-
+			}
+			
 			$this->cache_filename = "{$this->cache_prefix}{$this->filename}";
 			$this->cache_path = "{$this->width}x{$this->height}";
 			$this->cache_file = "{$this->cache_root}/{$this->cache_path}/{$this->cache_filename}";
@@ -146,7 +166,7 @@
 
 		private function GenerateCache()
 		{
-			if( $this->force_regeneration and file_exists( $this->cache_filename ) ) // force thumbnail regeneration
+			if( $this->force_regeneration && file_exists( $this->cache_filename ) ) // force thumbnail regeneration
 			{
 				unlink( $cache_filename );
 			}
@@ -166,11 +186,21 @@
 			
 			if( $this->file_type == 'jpeg' )
 			{
-				imagejpeg( $image, $this->cache_file, $this->jpeg_quality );
+				$created = imagejpeg( $image, $this->cache_file, $this->jpeg_quality );
 			}
 			elseif( $this->file_type == 'png' )
 			{
-				imagepng( $image, $this->cache_file, 9 );
+				$created = imagepng( $image, $this->cache_file, 9 );
+			}
+			
+			if( $created )
+			{
+				error_log( "Image {$this->cache_file} created." );
+			}
+			else
+			{
+				error_log( "[ImageHandler Error]: Image {$this->cache_file} not created." );
+
 			}
 		}
 
@@ -197,10 +227,15 @@
 			$this->GetCacheFilename();
 
 			if( !file_exists( $this->cache_file ) || $this->force_regeneration )
+			{
+				$this->image = $this->Load( $this->file );
+				$this->GetSourceDimensions();
 				$this->GenerateCache();
-			//else
-			//	error_log( "Read from cache: {$this->filename}" );
-
+			}
+			else
+			{
+				error_log( "Read from cache: {$this->filename}" );
+			}
 		}
 
 		// public methods

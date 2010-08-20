@@ -8,7 +8,7 @@
 
 		function AddElement( $element )
 		{
-			$this->elements[] = $element;	
+			$this->elements[] = $element;
 		}
 
 		function GenerateXML()
