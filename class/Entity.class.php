@@ -5,13 +5,9 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.5.1-2 PostgreSQL port - tested with basic Retrieve
- * @todo database specific drivers 
+ * @version 1.6.nightly - database specific drivers
  * @License GPL v3
  */
-	/*
-	* 1.5 - ORM::has_many
-	*/
 class Entity
 {
 	private static $dblink;
@@ -59,32 +55,10 @@ class Entity
 
 	function Connect()
 	{
-		switch( DB_TYPE )
-		{
-			case 'mysql':
-			{
-				$db = new mysqli( DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME );
-				break;
-			}
-			case 'sqlite':
-			{
-				$db = new SQLite3( DB_FILE );
-				break;
-			}
-			case 'postgresql':
-			{
-				var_dump( "Connecting: ". DSN );
-				$db = pg_connect( DSN );
-				break;
-			}
-			default:
-				die( 'Configuration error. Database unknown.' );
-		}
+		$driver = isset( $this->driver ) ? $this->driver : Config::get( 'DB_TYPE' );
+		$dsn	= isset( $this->dsn ) ? $this->dsn : Config::get( 'DSN' )
 
-		if( !$db )
-			die( 'Database connection failed.' );
-
-		return $db;
+		return new $driver( $dsn );
 	}
 
 	function __destruct()
@@ -168,16 +142,8 @@ class Entity
 		unset( $this->result ); // for object reuse
 
 		$timer = microtime( true );
-		$result = $this->db->query( $query );
 
-		if( DB_TYPE == 'mysql' )
-		{
-			$result = $this->db->query( $query );
-		}
-		elseif( DB_TYPE == 'postgresql' )
-		{
-			$result = pg_query( $this->db, $query );
-		}
+		$result = $this->db->query( $query );
 
 		$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
 
@@ -209,7 +175,9 @@ class Entity
 		}
 
 		if( isset( $this->result ) )
+		{
 			return $this->result;
+		}
 	}
 
 	/*
@@ -222,16 +190,7 @@ class Entity
 			return $this->schema;
 		}
 
-		if( DB_TYPE == 'mysql' )
-		{
-			$query = "DESC `{$this->table_name}`";
-			$result = $this->db->query( $query );
-		}
-		elseif( DB_TYPE == 'postgresql' )
-		{
-			$query = "\d {$this->table_name}";
-			$result = pg_query( $this->db, $query );
-		}
+		$result = $this->db->buildSchema( $this->table_name );
 
 		$objects = $this->BuildResult( $result, 'stdClass' );
 
@@ -282,15 +241,6 @@ class Entity
 			$object = new $class();
 			$object->BuildSchema();
 			$entity = Entity::getInstance();
-
-			if( DB_TYPE == 'postgresql' )
-			{
-				$query = "SELECT * FROM {$object->table_name} WHERE {$id_name} = ? LIMIT 1";
-			}
-			else
-			{
-				$query = "SELECT * FROM `{$object->table_name}` WHERE `{$id_name}` = ? LIMIT 1";
-			}
 
 			$object = $entity->GetFirstResult( $query, $id, $class );
 
@@ -540,32 +490,7 @@ class Entity
 
 	private function BuildResult( $result, $class )
 	{
-		if( DB_TYPE == 'mysql' )
-		{
-			if( $result ) while( $row = mysqli_fetch_object( $result, $class ) )
-			{
-				$this->result[] = $row;
-			}
-		}
-		elseif( DB_TYPE == 'postgresql' )
-		{
-			if( $result ) while( $row = pg_fetch_object( $result, null, $class ) )
-			{
-				$this->result[] = $row;
-			}
-		}
-		else
-		{
-			while( $row = $result->fetchArray() )
-			{
-				$this->result[] = Entity::Array2Entity( $row, $class );
-			}
-		}
-
-		if( isset( $this->result ) )
-		{
-			return $this->result;
-		}
+		return $this->db->fetch( $result, $class );
 	}
 
 	/**
@@ -607,11 +532,11 @@ class Entity
 		{
 			if( is_object( $argument ) )
 			{
-				$argument = "'". $this->Escape( $argument->id ) ."'";
+				$argument = "'". $this->db->escape( $argument->id ) ."'";
 			}
 			elseif( !is_numeric( $argument ) and isset( $argument ) )
 			{
-				$argument = "'". $this->Escape( $argument ) ."'";
+				$argument = "'". $this->db->escape( $argument ) ."'";
 			}
 			elseif( !isset( $argument ) )
 			{
@@ -623,25 +548,6 @@ class Entity
 		$new_query .= $query[ $i ];
 
 		return $new_query;
-	}
-
-	/*
-	 * Performs argument escape
-	 */
-	private function Escape( $string )
-	{
-		if( DB_TYPE == 'mysql' )
-		{
-			return $this->db->escape_string( $string );
-		}
-		elseif( DB_TYPE == 'postgresql' )
-		{
-			return pg_escape_string( $this->db, $string );
-		}	
-		elseif( DB_TYPE == 'sqlite' )
-		{
-			return $this->db->escapeString( $string );
-		}	
 	}
 
 	/*
