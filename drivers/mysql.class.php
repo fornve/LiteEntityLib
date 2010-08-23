@@ -57,6 +57,16 @@ class mysql implements dbdriver
 		return $this->resource->real_escape_string( $string );
 	}
 
+	public function escapeTable( $string )
+	{
+		return "`{$string}`";
+	}
+
+	public function escapeColumn( $string )
+	{
+		return "`{$string}`";
+	}
+
 	public function disconnect()
 	{
 		if( is_object( $this->resource ) )

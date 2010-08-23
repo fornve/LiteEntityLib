@@ -5,7 +5,7 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.6.nightly - database specific drivers
+ * @version 1.6.alpha - database specific drivers
  * @License GPL v3
  */
 class Entity
@@ -55,8 +55,10 @@ class Entity
 
 	function Connect()
 	{
-		$driver = isset( $this->driver ) ? $this->driver : Config::get( 'DB_TYPE' );
-		$dsn	= isset( $this->dsn ) ? $this->dsn : Config::get( 'DSN' )
+		$driver = isset( self::$driver ) ? self::$driver : Config::get( 'DB_TYPE' );
+		$dsn	= isset( self::$dsn ) ? self::$dsn : Config::get( 'DSN' );
+
+		require_once( INCLUDE_PATH ."/drivers/{$driver}.class.php" );
 
 		return new $driver( $dsn );
 	}
@@ -77,7 +79,9 @@ class Entity
 	function Query( $query, $arguments = null )
 	{
 		if( defined( 'DB_TABLE_PREFIX' ) && DB_TABLE_PREFIX )
+		{
 			$query = $this->Prefix( $query );
+		}
 
 		$query = $this->Arguments( $query, $arguments );
 
@@ -97,7 +101,11 @@ class Entity
 
 		$this->error = $this->db->error;
 		$this->query = $query;
-		$_SESSION[ 'entity_query' ][] = $query;
+
+		if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+		{
+			$_SESSION[ 'entity_query' ][] = $query;
+		}
 
 		if( $this->db->errno )
 		{
@@ -106,7 +114,7 @@ class Entity
 
 		if( $result === null )
 		{
-			echo " Warning, query returned null. [ {$query} ] ";
+			throw new EntityException( " Warning, query returned null. [ {$query} ] " );
 		}
 	}
 
@@ -151,9 +159,12 @@ class Entity
 
 		if( $result )
 		{
-			$this->BuildResult( $result, $class );
+			$this->result = $this->BuildResult( $result, $class );
 
-			$_SESSION[ 'entity_query' ][] = "[{$timer}] ". $query;
+			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			{
+				$_SESSION[ 'entity_query' ][] = "[{$timer}] ". $query;
+			}
 		}
 
 		$this->error = $this->db->error;
@@ -209,23 +220,6 @@ class Entity
 		return $this->schema = $schema;
 	}
 
-
-	/**
-	 * Retrieve column group results
-	 * @param int $column
-	 * @return object
-	 * Returns array of objects type of entity
-	 */
-	function TypeCollection( $type )
-	{
-		if( !in_array( $type, $this->GetSchema() ) )
-			return false;
-
-		$table_name = strtolower( get_class( $this ) );
-		$query = "SELECT {$type} FROM {$table_name} GROUP BY {$type}";
-		return $this->Collection( $query, null, 'Entity' );
-	}
-
 	/**
 	 * Retrieve row from database where id = $id ( or id => $id_name  )
 	 * @param int $id
@@ -242,10 +236,14 @@ class Entity
 			$object->BuildSchema();
 			$entity = Entity::getInstance();
 
+			$query = "SELECT * FROM ". $entity->escapeTable( $object->table_name ) ." WHERE ". $entity->escapeColumn( $id_name ) ." = ? LIMIT 1";
+
 			$object = $entity->GetFirstResult( $query, $id, $class );
 
 			if( !$object )
+			{
 				return null;
+			}
 
 			if( count( $object->has_many ) ) foreach( $object->has_many as &$child )
 			{
@@ -267,27 +265,13 @@ class Entity
 	}
 
 	/**
-	 * Gets kids collection
-	 * @param	string	$child_class		Child class name
-	 * @param	string	$parent_class		Parent class name
-	 * @param	int		$parent_id			Parent id
-	 * @return	array						Returns array of objects
-	 */
-	private final function ChildCollection( $parent_class, $parent_id )
-	{
-		$query = "SELECT * FROM `{$this->table_name}` WHERE `". strtolower( $parent_class ) ."` = ?";
-		$entity = Entity::getInstance();
-		return $entity->Collection( $query, array( $parent_id ), get_class( $this ) );
-	}
-
-	/**
 	 * Returns DAO object of first result (row) in given query
 	 * @param string $query
 	 * @param mixed $arguments
 	 * @param string $class
 	 * @return object
 	 */
-	function RetrieveFromQuery( $query, $arguments, $class = __CLASS__ )
+	function retrieveFromQuery( $query, $arguments, $class = __CLASS__ )
 	{
 		//$object_name = get_class( $this );
 		$object = new $class;
@@ -301,10 +285,12 @@ class Entity
 			return $object;
 		}
 		else
-			return $false;
+		{
+			return false;
+		}
 	}
 
-	function Save()
+	function save()
 	{
 		$table = $this->table_name;
 		$id = $this->id_name;
@@ -315,7 +301,7 @@ class Entity
 			$this->$id = $this->Create( $table );
 		}
 
-		$query = "UPDATE `{$table}` SET ";
+		$query = "UPDATE ". $this->escapeTable( $table ) ." SET ";
 
 		$notfirst = false;
 
@@ -326,18 +312,22 @@ class Entity
 				if( $notfirst )
 					$query .= ', ';
 
-				$query .= " `{$property}` = ?";
+				$query .= $this->escapeColumn( $property ) ."= ?";
 
 				if( is_object( $this->$property ) )
+				{
 					$arguments[] = $this->$property->id;
+				}
 				else
+				{
 					$arguments[] = $this->$property;
+				}
 
 				$notfirst = true;
 			}
 		}
 
-		$query .= " WHERE {$this->id_name} = ?";
+		$query .= " WHERE ". $this->escapeColumn( $this->id_name ) ." = ?";
 		$arguments[] = $this->{$id};
 
 		$this->Query( $query, $arguments );
@@ -358,15 +348,15 @@ class Entity
 
 		if( $id_value )
 		{
-			$query = "INSERT INTO `{$this->table_name}` ( `{$this->id_name}`, `{$column}` ) VALUES ( {$id_value}, 0 )";
+			$query = "INSERT INTO ". $this->escapeTable( $this->table_name ) ." ( ". $this->escapeColumn( $this->id_name ). ", ". $this->escapeColumn( $column ) ." ) VALUES ( {$id_value}, '0' )";
 		}
 		else
 		{
-			$query = "INSERT INTO `{$this->table_name}` ( `{$column}` ) VALUES ( 0 )";
+			$query = "INSERT INTO ". $this->escapeTable( $this->table_name ) ." ( ". $this->escapeColumn( $column ) ." ) VALUES ( '0' )";
 		}
 
 		$this->Query( $query );
-		$result = $this->GetFirstResult( "SELECT {$this->id_name} FROM `{$this->table_name}` WHERE `{$column}` = 0 ORDER BY `{$this->id_name}` DESC LIMIT 1", null, get_class( $this ) );
+		$result = $this->GetFirstResult( "SELECT ". $this->escapeColumn( $this->id_name ) ." FROM ". $this->escapeTable( $this->table_name ) ." WHERE ". $this->escapeColumn( $column ) ." = '0' ORDER BY ". $this->escapeColumn( $this->id_name ) ." DESC LIMIT 1", null, get_class( $this ) );
 		return $result->$id;
 	}
 
@@ -380,7 +370,9 @@ class Entity
 	function GetFirstResult( $query, $arguments = null, $class = __CLASS__ )
 	{
 		if( $query )
+		{
 			$this->Collection( $query, $arguments, $class );
+		}
 
 		if( isset( $this->result ) && isset( $this->result[ 0 ] ) )
 		{
@@ -395,7 +387,7 @@ class Entity
 	{
 		$this->PreDelete();
 
-		$query = "DELETE FROM `{$this->table_name}` WHERE {$this->id_name} = ?";
+		$query = "DELETE FROM ". $this->escapeTable( $this->table_name ) ." WHERE ". $this->escapeColumn( $this->id_name ) ." = ?";
 		$this->query( $query, $this->id );
 	}
 
@@ -406,12 +398,24 @@ class Entity
 	static function GetAll( $class = null )
 	{
 		if( !$class )
-			die( "Entity::GetAll - class name cannot be null." );
+		{
+			throw new EntityException( "Entity::GetAll - class name cannot be null." );
+		}
 
 		$object = new $class;
-		$query = "SELECT * from `{$object->table_name}` ORDER BY `{$object->id_name}`";
 		$entity = Entity::getInstance();
+		$query = "SELECT * from ". $entity->escapeTable( $object->table_name ) ." ORDER BY ". $entity->escapeColumn( $object->id_name );
 		return $entity->Collection( $query, null, $class );
+	}
+
+	public function escapeTable( $string )
+	{
+		return $this->db->escapeTable( $string );
+	}
+
+	public function escapeColumn( $string )
+	{
+		return $this->db->escapeColumn( $string );
 	}
 
 	/**
@@ -447,7 +451,9 @@ class Entity
 		if( $this->GetSchema() ) foreach( $this->schema as &$schema_key )
 		{
 			if( $key == $schema_key )
+			{
 				return true;
+			}
 		}
 	}
 
@@ -553,6 +559,7 @@ class Entity
 	/*
 	 * Frees result after multi query
 	 */
+	/* Deprectated
 	private function freeResult()
 	{
 		do
@@ -568,6 +575,7 @@ class Entity
 		}
 		while ( $this->db->next_result() );
 	}
+	*/
 
 	function Stripslashes( $result, $schema )
 	{
@@ -598,6 +606,7 @@ class Entity
 
 		return $str;
 	}
+
 	/**
 	 * Email error detais to administrator
 	 * @param db resource

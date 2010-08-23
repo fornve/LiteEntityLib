@@ -44,17 +44,32 @@ class postgresql implements dbdriver
 	{
 		$return = array();
 
-		if( $this->result ) while( $row = pg_fetch_object( $result, $class ) )
+		$i = 1;
+
+		if( $result && pg_num_rows( $result ) ) while( $row = pg_fetch_object( $result, $class ) )
 		{
 			$return[] = $row;
-		}
 
+			$i++;
+			if($i > pg_num_rows( $result ) ) break;
+		}
+debug_print_backtrace();
 		return $return;
 	}
 
 	public function escape( $string )
 	{
 		return pg_escape_string( $this->resource, $string );
+	}
+
+	public function escapeTable( $string )
+	{
+		return '"'. $string .'"';
+	}
+
+	public function escapeColumn( $string )
+	{
+		return '"'. $string .'"';
 	}
 
 	public function disconnect()

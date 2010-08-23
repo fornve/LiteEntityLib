@@ -2,30 +2,19 @@
 
 interface dbdriver
 {
-	protected $resource;
-	protected $result;
+	public function connect( $dsn );
 
-	public function connect()
-	{
-	}
+	public function buildSchema( $table );
 
-	public function query()
-	{
-	}
+	public function query( $query );
 
-	public function fetch()
-	{
-	}
+	public function fetch( $result, $class = 'stdClass');
 
-	public function fetchAll()
-	{
-	}
+	public function escape( $string );
 
-	public function escape()
-	{
-	}
+	public function escapeTable( $string );
 
-	public function disconnect()
-	{
-	}
+	public function escapeColumn( $string );
+
+	public function disconnect();
 }

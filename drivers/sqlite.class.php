@@ -59,6 +59,18 @@ class sqlite implements dbdriver
 		return $this->resource->escapeString( $string );
 	}
 
+	public function escapeTable( $string )
+	{
+		// To be fixed
+		return $string;
+	}
+
+	public function escapeColumn( $string )
+	{
+		// To be fixed
+		return $string;
+	}
+
 	public function disconnect()
 	{
 		if( is_object( $this->resource ) )
