@@ -34,7 +34,7 @@ class postgresql implements dbdriver
 
 		if( pg_last_error( $this->resource ) )
 		{
-			throw new DbException( $this->resource->error );
+			throw new DbException( pg_last_error( $this->resource ) );
 		}
 
 		return $result;
@@ -51,9 +51,12 @@ class postgresql implements dbdriver
 			$return[] = $row;
 
 			$i++;
-			if($i > pg_num_rows( $result ) ) break;
+			if( $i > pg_num_rows( $result ) )
+			{
+				break;
+			}
 		}
-debug_print_backtrace();
+
 		return $return;
 	}
 

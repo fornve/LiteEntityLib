@@ -22,6 +22,8 @@ class Entity
 	protected $id_name = 'id';
 	protected $has_many = array();
 	protected $has_one = array();
+	public $error;
+	public $query;
 
 	function __construct()
 	{
@@ -85,31 +87,23 @@ class Entity
 
 		$query = $this->Arguments( $query, $arguments );
 
-		if( $this->multi_query )
-		{
-			$result = $this->db->multi_query( $query );
-			$this->db_query_counter++;
-			$this->freeResult();
-			$this->multi_query = false;
-		}
-		else
-		{
-			$this->db_query_counter++;
+		$this->db_query_counter++;
 
+		try
+		{
 			$result = $this->db->query( $query );
+
+			$this->error = $this->db->error;
+			$this->query = $query;
+
+			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			{
+				$_SESSION[ 'entity_query' ][] = $query;
+			}
 		}
-
-		$this->error = $this->db->error;
-		$this->query = $query;
-
-		if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+		catch( DbException $e )
 		{
-			$_SESSION[ 'entity_query' ][] = $query;
-		}
-
-		if( $this->db->errno )
-		{
-			$this->Error( $this->db->errno, $arguments );
+			$this->Error( $e->getMessage(), $arguments, $e );
 		}
 
 		if( $result === null )
@@ -147,28 +141,32 @@ class Entity
 		$query = $this->Prefix( $query );
 		$query = $this->Arguments( $query, $arguments );
 
-		unset( $this->result ); // for object reuse
+		$this->query = $query;
 
-		$timer = microtime( true );
-
-		$result = $this->db->query( $query );
-
-		$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
-
-		$this->db_query_counter++;
-
-		if( $result )
+		try
 		{
-			$this->result = $this->BuildResult( $result, $class );
+			$timer = microtime( true );
 
-			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			$result = $this->db->query( $query );
+
+			$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
+
+			$this->db_query_counter++;
+
+			if( $result )
 			{
-				$_SESSION[ 'entity_query' ][] = "[{$timer}] ". $query;
+				$this->result = $this->BuildResult( $result, $class );
+
+				if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+				{
+					$_SESSION[ 'entity_query' ][] = "[{$timer}] ". $query;
+				}
 			}
 		}
-
-		$this->error = $this->db->error;
-		$this->query = $query;
+		catch( DbException $e )
+		{
+			$this->Error( $e->getMessage(), $arguments, $e );
+		}
 
 		if( $this->db->errno )
 		{
@@ -245,14 +243,14 @@ class Entity
 				return null;
 			}
 
-			if( count( $object->has_many ) ) foreach( $object->has_many as &$child )
+			if( isset( $object->has_many ) && count( $object->has_many ) ) foreach( $object->has_many as &$child )
 			{
 				$child_name = strtolower( self::GetPlural( $child ) );
 				$child_object = new $child();
 				$object->$child_name = $child_object->ChildCollection( $class, $object->id );
 			}
 
-			if( count( $object->has_one ) ) foreach( $object->has_one as &$child )
+			if( isset( $object->has_one ) && count( $object->has_one ) ) foreach( $object->has_one as &$child )
 			{
 				$child_object = new $child();
 				$child_name = strtolower( $child );
@@ -612,23 +610,23 @@ class Entity
 	 * @param db resource
 	 * @param mixed $arguments
 	 */
-	private function Error( $db, $attributes = null )
+	private function Error( $message, $attributes = null, $exception )
 	{
 		if( defined( 'DEVELOPER_EMAIL' ) )
 		{
 			$headers = "From: Entity crash at {". PROJECT_NAME ."}! <". DEVELOPER_EMAIL .">";
 			$message = "Entity object [". get_class( $this ) ."]: \n\n". var_export( $this, true ) ."\n\n{$break}\n\n".
-			"Arguments:\n\n".  var_export( $this, true ) ."\n\n{$break}\n".
-			"Database error:\n\n". var_export( $db, true ) ."\n\n{$break}\n\n".
-			"Backtrace:\n\n". var_export( debug_backtrace(), true ) ."\n\n{$break}\n\n".
+			"Arguments:\n\n".  var_export( $attributes, true ) ."\n\n{$break}\n".
+			"Error message:\n\n". $message ."\n\n{$break}\n\n".
 			"Server:\n\n". var_export( $_SERVER, true ) ."\n\n{$break}\n\n".
 			"POST:\n\n". var_export( $_POST, true ) ."\n\n{$break}\n\n".
-			"Session:\n\n". var_export( $_SESSION, true );
+			"Session:\n\n". var_export( $_SESSION, true ) ."\n\n".
+			"Backrtace\n\n". var_export( $exception->trace );
 
 			mail( DEVELOPER_EMAIL, 'Database entity Collection error', $message, $headers );
 		}
 
-		$e = new EntityException( $this->error );
+		$e = new EntityException( $message, $exception );
 		$e->attributes = array(
 			'query' => $this->query,
 			'attributes' => $attributes

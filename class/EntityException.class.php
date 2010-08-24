@@ -2,11 +2,20 @@
 
 class EntityException extends Exception
 {
-	public $backtrace = null;
+	public $trace = null;
 
-	public function __construct  ( $message, $code = 0, Exception $previous = null )
+	public function __construct( $message, $previous = null )
 	{
-		$this->backtrace = debug_backtrace( true );
-		parent::__construct( $message, $code, $previous );
+
+		if( $previous )
+		{
+			$this->previous = $previous;
+		}
+		else
+		{
+			$this->trace = debug_backtrace( true );
+		}
+
+		parent::__construct( $message, 0, $previous );
 	}
 }

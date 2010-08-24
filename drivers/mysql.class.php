@@ -44,9 +44,17 @@ class mysql implements dbdriver
 	{
 		$return = array();
 
-		if( $result ) while( $row = $result->fetchObject( $class ) )
+		$i = 1;
+
+		if( $result && $result->num_rows() ) while( $row = $result->fetchObject( $class ) )
 		{
 			$return[] = $row;
+
+			$i++;
+			if( $i > $result->num_rows() )
+			{
+				break;
+			}
 		}
 
 		return $return;
