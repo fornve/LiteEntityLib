@@ -25,7 +25,20 @@ class mysql implements dbdriver
 	public function buildSchema( $table )
 	{
 		$query = "DESC `{$table}`";
+		
 		$result = $this->query( $query );
+	
+		$objects = $this->fetch( $result, 'stdClass' );
+
+		if( $objects ) foreach( $objects as &$object )
+		{
+			if( strlen( $object->Field ) > 0 )
+			{
+				$schema[] = $object->Field;
+			}
+		}
+
+		return $schema;
 	}
 
 	public function query( $query )
@@ -45,14 +58,13 @@ class mysql implements dbdriver
 		$return = array();
 
 		$i = 1;
-		$affected_rows = $this->resource->affected_rows();
 
-		if( $result && $affected_rows > 0 ) while( $row = $result->fetchObject( $class ) )
+		if( $result && $this->resource->affected_rows > 0 ) while( $row = $result->fetch_object( $class ) )
 		{
 			$return[] = $row;
 
 			$i++;
-			if( $i > $affected_rows )
+			if( $i > $this->resource->affected_rows )
 			{
 				break;
 			}
@@ -74,6 +86,11 @@ class mysql implements dbdriver
 	public function escapeColumn( $string )
 	{
 		return "`{$string}`";
+	}
+
+	public function escapeData( $string )
+	{
+		return "'{$string}'";
 	}
 
 	public function disconnect()

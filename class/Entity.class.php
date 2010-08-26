@@ -17,7 +17,7 @@ class Entity
 	public $db_query_counter = 0;
 	protected static $__CLASS__ = __CLASS__;
 	protected static $instance = null;
-	protected $schema = array();
+	protected static $schema = array();
 	protected $table_name = null;
 	protected $id_name = 'id';
 	protected $has_many = array();
@@ -179,7 +179,7 @@ class Entity
 
 			if( $class->GetSchema() )
 			{
-				$this->result = Entity::Stripslashes( $this->result, $class->schema );
+				$this->result = Entity::Stripslashes( $this->result, $class::$schema );
 			}
 		}
 
@@ -194,28 +194,14 @@ class Entity
 	 */
 	function BuildSchema()
 	{
-		if( $this->schema )
+		if( count( $this::$schema ) > 0 )
 		{
-			return $this->schema;
+			return $this::$schema;
 		}
 
-		$result = $this->db->buildSchema( $this->table_name );
+		$this::$schema = $this->db->buildSchema( $this->table_name );
 
-		$objects = $this->BuildResult( $result, 'stdClass' );
-
-		$schema = array();
-
-		if( $objects ) foreach( $objects as &$object )
-		{
-			if( strlen( $object->Field ) > 0 )
-			{
-				$schema[] = $object->Field;
-			}
-		}
-
-		unset( $query, $result, $objects );
-
-		return $this->schema = $schema;
+		return $this::$schema;
 	}
 
 	/**
@@ -303,9 +289,9 @@ class Entity
 
 		$notfirst = false;
 
-		foreach( $this->schema as &$property )
+		foreach( $this::$schema as &$property )
 		{
-			if( $property != $this->schema[ 0 ] )
+			if( $property != $this::$schema[ 0 ] )
 			{
 				if( $notfirst )
 					$query .= ', ';
@@ -342,7 +328,7 @@ class Entity
 	{
 		$this->GetSchema();
 		$id = & $this->id_name;
-		$column = $this->schema[ 1 ];
+		$column = $this::$schema[ 1 ];
 
 		if( $id_value )
 		{
@@ -424,7 +410,7 @@ class Entity
 	{
 		$input = Common::Inputs( $this->GetSchema(), $method );
 
-		foreach( $this->schema as &$property )
+		foreach( $this::$schema as &$property )
 		{
 			$this->$property = $input->$property;
 		}
@@ -436,17 +422,17 @@ class Entity
 	 */
 	public function GetSchema()
 	{
-		if( count( $this->schema ) < 1 )
+		if( count( $this::$schema ) < 1 )
 		{
-			$this->BuildSchema();
+			$this::$schema = $this->BuildSchema();
 		}
 
-		return $this->schema;
+		return $this::$schema;
 	}
 
 	public function InSchema( $key )
 	{
-		if( $this->GetSchema() ) foreach( $this->schema as &$schema_key )
+		if( $this->GetSchema() ) foreach( $this::$schema as &$schema_key )
 		{
 			if( $key == $schema_key )
 			{
@@ -536,11 +522,11 @@ class Entity
 		{
 			if( is_object( $argument ) )
 			{
-				$argument = "'". $this->db->escape( $argument->id ) ."'";
+				$argument = $this->db->escapeData( $this->db->escape( $argument->id ) );
 			}
 			elseif( !is_numeric( $argument ) and isset( $argument ) )
 			{
-				$argument = "'". $this->db->escape( $argument ) ."'";
+				$argument = $this->db->escapeData( $this->db->escape( $argument ) );
 			}
 			elseif( !isset( $argument ) )
 			{
@@ -553,27 +539,6 @@ class Entity
 
 		return $new_query;
 	}
-
-	/*
-	 * Frees result after multi query
-	 */
-	/* Deprectated
-	private function freeResult()
-	{
-		do
-		{
-			// store first result set
-			if ($result = $this->db->store_result())
-			{
-				$result->free();
-			}
-
-			// print divider
-			$this->db->more_results();
-		}
-		while ( $this->db->next_result() );
-	}
-	*/
 
 	function Stripslashes( $result, $schema )
 	{

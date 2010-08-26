@@ -24,8 +24,8 @@ class postgresql implements dbdriver
 
 	public function buildSchema( $table )
 	{
-		$query = "\d {$table}";
-		$result = $this->query( $query );
+		$result = pg_meta_data( $this->resource, $table );
+		return array_keys( $result );
 	}
 
 	public function query( $query )
@@ -73,6 +73,11 @@ class postgresql implements dbdriver
 	public function escapeColumn( $string )
 	{
 		return '"'. $string .'"';
+	}
+
+	public function escapeData( $string )
+	{
+		return "'". $string ."'";
 	}
 
 	public function disconnect()

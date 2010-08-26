@@ -16,5 +16,7 @@ interface dbdriver
 
 	public function escapeColumn( $string );
 
+	public function escapeData( $string );
+
 	public function disconnect();
 }
