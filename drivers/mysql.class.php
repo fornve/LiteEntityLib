@@ -14,7 +14,7 @@ class mysql implements dbdriver
 
 	public function connect( $dns )
 	{
-		$this->resource = new mysql( $dns[ 'host' ], $dns[ 'user' ], $dns[ 'password' ], $dns[ 'database' ] );
+		$this->resource = new mysqli( $dns[ 'host' ], $dns[ 'user' ], $dns[ 'password' ], $dns[ 'database' ] );
 
 		if( !$this->resource )
 		{
@@ -45,13 +45,14 @@ class mysql implements dbdriver
 		$return = array();
 
 		$i = 1;
+		$affected_rows = $this->resource->affected_rows();
 
-		if( $result && $result->num_rows() ) while( $row = $result->fetchObject( $class ) )
+		if( $result && $affected_rows > 0 ) while( $row = $result->fetchObject( $class ) )
 		{
 			$return[] = $row;
 
 			$i++;
-			if( $i > $result->num_rows() )
+			if( $i > $affected_rows )
 			{
 				break;
 			}
