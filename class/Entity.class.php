@@ -5,7 +5,7 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.6.alpha - database specific drivers
+ * @version 1.6.beta - database specific drivers
  * @License GPL v3
  */
 class Entity
@@ -17,7 +17,7 @@ class Entity
 	public $db_query_counter = 0;
 	protected static $__CLASS__ = __CLASS__;
 	protected static $instance = null;
-	protected static $schema = array();
+	protected $schema = array();
 	protected $table_name = null;
 	protected $id_name = 'id';
 	protected $has_many = array();
@@ -103,12 +103,12 @@ class Entity
 		}
 		catch( DbException $e )
 		{
-			$this->Error( $e->getMessage(), $arguments, $e );
+			throw new EntityException( $e->getMessage(), $arguments, $e );
 		}
 
 		if( $result === null )
 		{
-			throw new EntityException( " Warning, query returned null. [ {$query} ] " );
+			throw new EntityException( " Warning, query returned null. [ {$query} ] ", $arguments );
 		}
 	}
 
@@ -165,21 +165,16 @@ class Entity
 		}
 		catch( DbException $e )
 		{
-			$this->Error( $e->getMessage(), $arguments, $e );
-		}
-
-		if( $this->db->errno )
-		{
-			$this->Error( $this->db->error, $arguments );
+			throw new EntityException( $e->getMessage(), $arguments, $e );
 		}
 
 		if( $class && isset( $this->result ) )
 		{
-			$class = new $class;
+			$class = new $class();
 
 			if( $class->GetSchema() )
 			{
-				$this->result = Entity::Stripslashes( $this->result, $class::$schema );
+				$this->result = Entity::Stripslashes( $this->result, $class->schema );
 			}
 		}
 
@@ -194,14 +189,21 @@ class Entity
 	 */
 	function BuildSchema()
 	{
-		if( count( $this::$schema ) > 0 )
+		if( count( $this->schema ) > 0 )
 		{
-			return $this::$schema;
+			return $this->schema;
 		}
 
-		$this::$schema = $this->db->buildSchema( $this->table_name );
+		try
+		{
+			$this->schema = $this->db->buildSchema( $this->table_name );
+		}
+		catch( DbException $e )
+		{
+			throw new EntityException( $e->getMessage(), null, $e );
+		}
 
-		return $this::$schema;
+		return $this->schema;
 	}
 
 	/**
@@ -212,7 +214,7 @@ class Entity
 	 * @return object
 	 * Returns object type of entity
 	 */
-	static function Retrieve( $id, $class, $id_name = 'id' )
+	static function Retrieve( $id, $class = __CLASS__, $id_name = 'id' )
 	{
 		if( $id )
 		{
@@ -248,6 +250,20 @@ class Entity
 
 	}
 
+    /** 
+	 * Gets kids collection
+	 * @param   string  $child_class        Child class name
+	 * @param   string  $parent_class       Parent class name
+	 * @param   int     $parent_id          Parent id
+	 * @return  array                       Returns array of objects
+	 */
+	protected final function ChildCollection( $parent_class, $parent_id )
+    {   
+        $query = "SELECT * FROM ". $this->escapeTable( $this->table_name )." WHERE ". $this->escapeColumn( strtolower( $parent_class ) ) ." = ?";
+        $entity = Entity::getInstance();
+        return $entity->Collection( $query, array( $parent_id ), get_class( $this ) );
+    }   
+											
 	/**
 	 * Returns DAO object of first result (row) in given query
 	 * @param string $query
@@ -289,9 +305,9 @@ class Entity
 
 		$notfirst = false;
 
-		foreach( $this::$schema as &$property )
+		foreach( $this->schema as &$property )
 		{
-			if( $property != $this::$schema[ 0 ] )
+			if( $property != $this->schema[ 0 ] )
 			{
 				if( $notfirst )
 					$query .= ', ';
@@ -328,7 +344,7 @@ class Entity
 	{
 		$this->GetSchema();
 		$id = & $this->id_name;
-		$column = $this::$schema[ 1 ];
+		$column = $this->schema[ 1 ];
 
 		if( $id_value )
 		{
@@ -410,7 +426,7 @@ class Entity
 	{
 		$input = Common::Inputs( $this->GetSchema(), $method );
 
-		foreach( $this::$schema as &$property )
+		foreach( $this->schema as &$property )
 		{
 			$this->$property = $input->$property;
 		}
@@ -422,17 +438,17 @@ class Entity
 	 */
 	public function GetSchema()
 	{
-		if( count( $this::$schema ) < 1 )
+		if( count( $this->schema ) < 1 )
 		{
-			$this::$schema = $this->BuildSchema();
+			$this->schema = $this->BuildSchema();
 		}
 
-		return $this::$schema;
+		return $this->schema;
 	}
 
 	public function InSchema( $key )
 	{
-		if( $this->GetSchema() ) foreach( $this::$schema as &$schema_key )
+		if( $this->GetSchema() ) foreach( $this->schema as &$schema_key )
 		{
 			if( $key == $schema_key )
 			{
@@ -575,7 +591,7 @@ class Entity
 	 * @param db resource
 	 * @param mixed $arguments
 	 */
-	private function Error( $message, $attributes = null, $exception )
+	/*private function Error( $message, $attributes = null, $exception )
 	{
 		if( defined( 'DEVELOPER_EMAIL' ) )
 		{
@@ -585,8 +601,8 @@ class Entity
 			"Error message:\n\n". $message ."\n\n{$break}\n\n".
 			"Server:\n\n". var_export( $_SERVER, true ) ."\n\n{$break}\n\n".
 			"POST:\n\n". var_export( $_POST, true ) ."\n\n{$break}\n\n".
-			"Session:\n\n". var_export( $_SESSION, true ) ."\n\n".
-			"Backrtace\n\n". var_export( $exception->trace );
+			"Session:\n\n". var_export( $_SESSION, true ) ."\n\n";
+//			"Backrtace\n\n". var_export( $exception->trace );
 
 			mail( DEVELOPER_EMAIL, 'Database entity Collection error', $message, $headers );
 		}
@@ -598,5 +614,5 @@ class Entity
 		);
 
 		throw $e;
-	}
+	}*/
 }

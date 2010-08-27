@@ -28,8 +28,8 @@
 class ImageserverUploader {
 	protected $token;
 	protected $service;
-	private $upload_endpoint = "http://img.sum-e.com/File/Upload/";
-	private $delete_endpoint = "http://img.sum-e.com/File/Delete/";
+	private $upload_endpoint = Config::get( 'imageserver.endpoint.upload' );
+	private $delete_endpoint = Config::get( 'imageserver.endpoint.delete' );
 
 	public function __construct( $service, $token ) 
 	{
@@ -43,11 +43,15 @@ class ImageserverUploader {
 	public function upload( $filename, $remoteDir='/' ) 
 	{
 		if (!file_exists($filename) or !is_file($filename) or !is_readable($filename))
+		{
 			throw new Exception("File '$filename' does not exist or is not readable.");
-		
+		}
+
 		if (!is_string($remoteDir))
+		{
 			throw new Exception("Remote directory must be a string, is ".gettype($remoteDir)." instead.");
-		
+		}
+
 		$data = $this->request( $this->upload_endpoint, true, 
 			array(
 				'plain' => 'yes', 
@@ -65,7 +69,7 @@ class ImageserverUploader {
 		return true; 
 	}
 
-	public function delete( $filename, $remoteDir='/' )
+	public function delete( $filename, $remoteDir = '/' )
 	{
 		  $data = $this->request( $this->delete_endpoint, true,
 			array(

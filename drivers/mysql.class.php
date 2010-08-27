@@ -47,7 +47,9 @@ class mysql implements dbdriver
 
 		if( $this->resource->error )
 		{
-			throw new DbException( $this->resource->error );
+			$e = new DbException( $this->resource->error );
+			$e->query = $query;
+			throw $e;
 		}
 
 		return $result;
@@ -97,7 +99,11 @@ class mysql implements dbdriver
 	{
 		if( is_object( $this->resource ) )
 		{
-			$this->resource->close();
+			$thread_id = $mysqli->thread_id;
+			if( $thread_id )
+			{
+				$mysqli->kill( $thread_id );
+			}
 		}
 	}
 

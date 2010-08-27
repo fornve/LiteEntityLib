@@ -3,9 +3,11 @@
 class EntityException extends Exception
 {
 	public $trace = null;
+	public $arguments = null;
 
-	public function __construct( $message, $previous = null )
+	public function __construct( $message, $arguments = null, $previous = null )
 	{
+		$this->arguments = $arguments;		
 
 		if( $previous )
 		{
