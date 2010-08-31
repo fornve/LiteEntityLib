@@ -28,14 +28,21 @@
 class ImageserverUploader {
 	protected $token;
 	protected $service;
-	private $upload_endpoint = Config::get( 'imageserver.endpoint.upload' );
-	private $delete_endpoint = Config::get( 'imageserver.endpoint.delete' );
+
+	private $upload_endpoint;
+	private $delete_endpoint;
 
 	public function __construct( $service, $token ) 
 	{
+		$this->upload_endpoint = Config::get( 'imageserver.endpoint.upload' );
+		$this->delete_endpoint = Config::get( 'imageserver.endpoint.delete' );
+
 		// Check requirements
 		if (!extension_loaded('curl'))
+		{
 			throw new Exception('ImageserverUploader requires the cURL extension.');
+		}
+
 		$this->service = $service; 
 		$this->token = $token;
 	}
@@ -63,10 +70,12 @@ class ImageserverUploader {
 
 		error_log( 'Uploading file: '. $filename .' into dir '. $remoteDir );
 
-		if (strpos($data, 'HTTP/1.1 200 OK') === false)
+		return unserialize( $data );
+
+		/*if (strpos($data, 'HTTP/1.1 200 OK') === false)
 			return false;
 
-		return true; 
+		return true;*/ 
 	}
 
 	public function delete( $filename, $remoteDir = '/' )
@@ -85,10 +94,11 @@ class ImageserverUploader {
 		return true; 
 	}
 
-	protected function request($url, $post=false, $postData=array()) {
+	protected function request($url, $post=false, $postData=array()) 
+	{
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HEADER, 1);
+		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		if ($post) {
 			curl_setopt($ch, CURLOPT_POST, $post);
