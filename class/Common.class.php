@@ -66,16 +66,24 @@ class Common
 		return $return;
 	}
 
-	static function Inputs( $array, $input_type = INPUT_GET )
+	static function Inputs( $array, $input_method = INPUT_GET )
 	{
-		$input = new stdClass;
+		$input = new Input();
+		$input->input_method = $input_method;
 
-		foreach ( $array as $key )
+		if( is_array( $array ) )
 		{
-			if( strlen( $key ) < 1 )
-				die( 'Input key empty in Common::Inputs.' );
-			
-			$input->$key = addslashes( filter_input( $input_type, $key ) );
+			foreach ( $array as $key )
+			{
+				if( strlen( $key ) < 1 )
+					die( 'Input key empty in Common::Inputs.' );
+				
+				$input->$key = filter_input( $input_method, $key );
+			}
+		}
+		elseif( $array === true )
+		{
+			$input->fetch_values_on_fly = true;
 		}
 
 		return $input;
