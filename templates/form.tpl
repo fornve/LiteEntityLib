@@ -1,5 +1,5 @@
 {strip}
-<form method="{$form->method}" action="{$form->action}"{if $form->file_upload} enctype="multipart/form-data"{/if}{if $form->class} class="{$form->class}"{/if}>
+<form method="{$form->method}" action="{$form->action}"{if $form->file_upload} enctype="multipart/form-data"{/if} class="autoform {if $form->class}{$form->class}{/if}"{if $form->onsubmit} onsubmit="{$form->onsubmit}"{/if}>
 	<table>
 		{foreach from=$form->fields key=name item=field}
 		<tr{if $field->error|@count} class="error"{/if}>
@@ -116,7 +116,7 @@
 				{if $form->submit.type == 'image'}
 					<input type="image" src="{$form->submit.src}" alt="{$form->submit.value}"{if $form->submit.class} class="{$form->submit.class}"{/if} />
 				{else}
-					<input type="submit" value="{$form->submit.value}"{if $form->submit.class} class="{$form->submit.class}"{/if}{if $form->submit.onclick} class="{$form->submit.onclick}"{/if}{if $form->submit.style} style="{$form->submit.style}"{/if} />
+					<input type="submit" value="{$form->submit.value}"{if $form->submit.class} class="{$form->submit.class}"{/if}{if $form->submit.onclick} onclick="{$form->submit.onclick}"{/if}{if $form->submit.style} style="{$form->submit.style}"{/if} />
 				{/if}
 			</td>
 		</tr>

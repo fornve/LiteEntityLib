@@ -138,13 +138,15 @@
 			if( !$this->value )
 				return false;
 
-			$query = "SELECT * FROM `{$table}` WHERE `{$column}` = ?";
 			$entity = Entity::getInstance();
+			$query = "SELECT * FROM ". $entity->escapeTable( $table ) ." WHERE ". $entity->escapeColumn( $column ) ." = ?";
 
-			if( $entity->GetFirstResult( $query, $this->value ) )
+			if( $entity->getFirstResult( $query, trim( $this->value ), $table ) )
 			{
 				if( !$error_text )
+				{
 					$error_text = 'Taken.';
+				}
 
 				$this->error[] = $error_text;
 			}
@@ -155,10 +157,10 @@
 			if( !$this->value )
 				return false;
 
-			$query = "SELECT * FROM `{$table}` WHERE `{$column}` = ?";
 			$entity = Entity::getInstance();
+			$query = "SELECT * FROM ". $entity->escapeTable( $table ) ." WHERE ". $entity->escapeColumn( $column ) ." = ?";
 
-			if( !$entity->GetFirstResult( $query, $this->value ) )
+			if( !$entity->GetFirstResult( $query, $this->value, $table ) )
 			{
 				if( !$error_text )
 					$error_text = 'Not in database';

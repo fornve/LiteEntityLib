@@ -5,7 +5,7 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.6.beta - database specific drivers
+ * @version 1.6.0
  * @License GPL v3
  */
 class Entity
@@ -242,7 +242,7 @@ class Entity
 			{
 				$child_object = new $child();
 				$child_name = strtolower( $child );
-				$object->$child_name = $child->Retrieve( $this->$child );
+				$object->$child_name = self::Retrieve( $object->$child_name, $child );
 			}
 
 			return $object;
