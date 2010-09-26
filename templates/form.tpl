@@ -2,6 +2,9 @@
 <form method="{$form->method}" action="{$form->action}"{if $form->file_upload} enctype="multipart/form-data"{/if} class="autoform {if $form->class}{$form->class}{/if}"{if $form->onsubmit} onsubmit="{$form->onsubmit}"{/if}>
 	<table>
 		{foreach from=$form->fields key=name item=field}
+		{if $field->type == 'hidden'}
+			<input type="hidden" id="{$name}" name="{$name}" value="{if $field->value}{$field->value}{/if}" />
+		{else}	
 		<tr{if $field->error|@count} class="error"{/if}>
 			<th>
 				<label for="{$name}">{$field->label}</label>
@@ -109,7 +112,7 @@
 				{/foreach}
 			</td>
 		</tr>
-
+		{/if}
 		{/foreach}
 		<tr>
 			<td>
