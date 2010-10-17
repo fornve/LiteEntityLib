@@ -127,7 +127,7 @@
 			if( !preg_match( "/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/", $this->value ) )
 			{
 				if( !$error_text )
-					$error_text = "Must ve valid email address.";
+					$error_text = "Must be valid email address.";
 
 				$this->error[] = $error_text;
 			}
@@ -141,7 +141,7 @@
 			$entity = Entity::getInstance();
 			$query = "SELECT * FROM ". $entity->escapeTable( $table ) ." WHERE ". $entity->escapeColumn( $column ) ." = ?";
 
-			if( $entity->getFirstResult( $query, trim( $this->value ), $table ) )
+			if( $entity->getFirstResult( $query, trim( $this->value ), ucfirst( $table ) ) )
 			{
 				if( !$error_text )
 				{
