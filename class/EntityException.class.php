@@ -7,7 +7,7 @@ class EntityException extends Exception
 
 	public function __construct( $message, $arguments = null, $previous = null )
 	{
-		$this->arguments = $arguments;		
+		$this->arguments = $arguments;
 
 		if( $previous )
 		{
@@ -18,6 +18,6 @@ class EntityException extends Exception
 			$this->trace = debug_backtrace( true );
 		}
 
-		parent::__construct( $message, 0, $previous );
+		parent::__construct( $message );
 	}
 }
