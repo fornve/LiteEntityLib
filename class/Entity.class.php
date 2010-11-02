@@ -5,7 +5,7 @@
  * @author Marek Dajnowski (first release 20080614)
  * @documentation http://dajnowski.net/wiki/index.php5/Entity
  * @latest http://github.com/fornve/LiteEntityLib/tree/master/class/Entity.class.php
- * @version 1.6.0
+ * @version 1.6.1
  * @License GPL v3
  */
 class Entity
@@ -22,6 +22,11 @@ class Entity
 	protected $id_name = 'id';
 	protected $has_many = array();
 	protected $has_one = array();
+	
+	/*
+	 * Determines wether object is going to be saved or not
+	 */
+	protected $updated = false;
 	public $error;
 	public $query;
 
@@ -120,7 +125,7 @@ class Entity
 	 * @return array
 	 * Returns array of objects
 	 */
-	function Collection( $query, $arguments = null, $class = __CLASS__, $limit = null, $offset = null )
+	function collection( $query, $arguments = null, $class = __CLASS__, $limit = null, $offset = null )
 	{
 		if( $limit )
 		{
@@ -155,7 +160,7 @@ class Entity
 
 			if( $result )
 			{
-				$this->result = $this->BuildResult( $result, $class );
+				$this->result = $this->buildResult( $result, $class );
 
 				if( defined( 'PRODUCTION' ) && PRODUCTION === false )
 				{
@@ -174,7 +179,7 @@ class Entity
 
 			if( $class->GetSchema() )
 			{
-				$this->result = Entity::Stripslashes( $this->result, $class->schema );
+				$this->result = Entity::stripslashes( $this->result, $class->schema );
 			}
 		}
 
@@ -187,7 +192,7 @@ class Entity
 	/*
 	 * Builds DAO schema
 	 */
-	function BuildSchema()
+	function buildSchema()
 	{
 		if( count( $this->schema ) > 0 )
 		{
@@ -214,7 +219,7 @@ class Entity
 	 * @return object
 	 * Returns object type of entity
 	 */
-	static function Retrieve( $id, $class = __CLASS__, $id_name = 'id' )
+	static function retrieve( $id, $class = __CLASS__, $id_name = 'id' )
 	{
 		if( $id )
 		{
@@ -244,6 +249,8 @@ class Entity
 				$child_name = strtolower( $child );
 				$object->$child_name = self::Retrieve( $object->$child_name, $child );
 			}
+
+			$object->updated = false;
 
 			return $object;
 		}
@@ -279,9 +286,15 @@ class Entity
 		$entity = Entity::getInstance();
 		$result = $object->GetFirstResult( $query, $arguments );
 
-		if( $result ) foreach( $result as $key => &$value )
-		{
-			$object->$key = $value;
+		if( $result )
+		{ 
+			foreach( $result as $key => &$value )
+			{
+				$object->$key = $value;
+			}
+
+			$object->updated = false;
+
 			return $object;
 		}
 		else
@@ -292,8 +305,14 @@ class Entity
 
 	function save()
 	{
-		$table = $this->table_name;
 		$id = $this->id_name;
+
+		if( !$this->updated )
+		{
+			return $this->$id;
+		}
+
+		$table = $this->table_name;
 		$this->GetSchema(); // force to generate schema
 
 		if( !$this->$id )
@@ -331,6 +350,8 @@ class Entity
 		$arguments[] = $this->{$id};
 
 		$this->Query( $query, $arguments );
+
+		$this->updated = false;
 	}
 
 	//function Update() { $this->Save(); }
@@ -357,6 +378,9 @@ class Entity
 
 		$this->Query( $query );
 		$result = $this->GetFirstResult( "SELECT ". $this->escapeColumn( $this->id_name ) ." FROM ". $this->escapeTable( $this->table_name ) ." WHERE ". $this->escapeColumn( $column ) ." = '0' ORDER BY ". $this->escapeColumn( $this->id_name ) ." DESC LIMIT 1", null, get_class( $this ) );
+
+	$this->updated = false;
+
 		return $result->$id;
 	}
 
@@ -494,7 +518,7 @@ class Entity
 		return $original_class;
 	}
 
-	private function BuildResult( $result, $class )
+	private function buildResult( $result, $class )
 	{
 		return $this->db->fetch( $result, $class );
 	}
@@ -504,7 +528,7 @@ class Entity
 	 * @param string $query
 	 * @return string
 	 */
-	private function Prefix( $query )
+	private function prefix( $query )
 	{
 		//global $mosConfig_dbprefix; // joomla 1.0
 		if( defined( 'DB_TABLE_PREFIX' ) )
@@ -522,7 +546,7 @@ class Entity
 	 * @param mixed $arguments
 	 * @return string
 	 */
-	private function Arguments( $query, $arguments = null )
+	private function arguments( $query, $arguments = null )
 	{
 		$query = explode( '?', $query );
 		$i = 0;
@@ -556,7 +580,7 @@ class Entity
 		return $new_query;
 	}
 
-	function Stripslashes( $result, $schema )
+	public function stripslashes( $result, $schema )
 	{
 		foreach( $schema as &$key )
 		{
@@ -567,7 +591,7 @@ class Entity
 		return $result;
 	}
 
-	function GetPlural( $str )
+	public function getPlural( $str )
 	{
 		if( preg_match( '/[sxz]$/', $str ) OR preg_match( '/[^aeioudgkprt]h$/', $str ) )
 		{
@@ -585,6 +609,16 @@ class Entity
 
 		return $str;
 	}
+
+	public function __set( $variable, $value )
+	{
+		if( in_array( $variable, $this->schema ) && $value !== $this->$variable)
+		{
+			$this->updated = true;
+		}
+
+		$this->$variable = $value;
+	} 
 
 	/**
 	 * Email error detais to administrator
