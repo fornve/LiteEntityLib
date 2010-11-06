@@ -178,5 +178,10 @@
 			}
 		}
 
+		public function __toString()
+		{
+			return $this->value;
+		}
+	
 		// end of validators
 	}
