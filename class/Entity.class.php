@@ -307,10 +307,12 @@ class Entity
 	{
 		$id = $this->id_name;
 
+		/* Needs finish
 		if( !$this->updated )
 		{
 			return $this->$id;
 		}
+		*/
 
 		$table = $this->table_name;
 		$this->GetSchema(); // force to generate schema
