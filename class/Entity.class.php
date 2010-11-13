@@ -60,7 +60,7 @@ class Entity
 		return self::$instance;
 	}
 
-	function Connect()
+	public function connect()
 	{
 		$driver = isset( self::$driver ) ? self::$driver : Config::get( 'DB_TYPE' );
 		$dsn	= isset( self::$dsn ) ? self::$dsn : Config::get( 'DSN' );
@@ -70,7 +70,7 @@ class Entity
 		return new $driver( $dsn );
 	}
 
-	function __destruct()
+	public function __destruct()
 	{
 		/*if ( is_object( $this->db ) )
 		{
@@ -83,7 +83,7 @@ class Entity
 	 * @param string $query
 	 * @param mixed $arguments
 	 */
-	function Query( $query, $arguments = null )
+	public function query( $query, $arguments = null )
 	{
 		if( defined( 'DB_TABLE_PREFIX' ) && DB_TABLE_PREFIX )
 		{
@@ -125,7 +125,7 @@ class Entity
 	 * @return array
 	 * Returns array of objects
 	 */
-	function collection( $query, $arguments = null, $class = __CLASS__, $limit = null, $offset = null )
+	public function collection( $query, $arguments = null, $class = __CLASS__, $limit = null, $offset = null )
 	{
 		if( $limit )
 		{
@@ -177,7 +177,7 @@ class Entity
 		{
 			$class = new $class();
 
-			if( $class->GetSchema() )
+			if( $class->getSchema() )
 			{
 				$this->result = Entity::stripslashes( $this->result, $class->schema );
 			}
@@ -192,7 +192,7 @@ class Entity
 	/*
 	 * Builds DAO schema
 	 */
-	function buildSchema()
+	public function buildSchema()
 	{
 		if( count( $this->schema ) > 0 )
 		{
@@ -219,12 +219,12 @@ class Entity
 	 * @return object
 	 * Returns object type of entity
 	 */
-	static function retrieve( $id, $class = __CLASS__, $id_name = 'id' )
+	public static function retrieve( $id, $class = __CLASS__, $id_name = 'id' )
 	{
 		if( $id )
 		{
 			$object = new $class();
-			$object->BuildSchema();
+			$object->buildSchema();
 			$entity = Entity::getInstance();
 
 			$query = "SELECT * FROM ". $entity->escapeTable( $object->table_name ) ." WHERE ". $entity->escapeColumn( $id_name ) ." = ? LIMIT 1";
@@ -264,7 +264,7 @@ class Entity
 	 * @param   int     $parent_id          Parent id
 	 * @return  array                       Returns array of objects
 	 */
-	protected final function ChildCollection( $parent_class, $parent_id )
+	protected final function childCollection( $parent_class, $parent_id )
     {   
         $query = "SELECT * FROM ". $this->escapeTable( $this->table_name )." WHERE ". $this->escapeColumn( strtolower( $parent_class ) ) ." = ?";
         $entity = Entity::getInstance();
@@ -278,7 +278,7 @@ class Entity
 	 * @param string $class
 	 * @return object
 	 */
-	function retrieveFromQuery( $query, $arguments, $class = __CLASS__ )
+	public function retrieveFromQuery( $query, $arguments, $class = __CLASS__ )
 	{
 		//$object_name = get_class( $this );
 		$object = new $class;
@@ -303,7 +303,7 @@ class Entity
 		}
 	}
 
-	function save()
+	public function save()
 	{
 		$id = $this->id_name;
 
@@ -315,7 +315,7 @@ class Entity
 		*/
 
 		$table = $this->table_name;
-		$this->GetSchema(); // force to generate schema
+		$this->getSchema(); // force to generate schema
 
 		if( !$this->$id )
 		{
@@ -331,7 +331,9 @@ class Entity
 			if( $property != $this->schema[ 0 ] )
 			{
 				if( $notfirst )
+				{
 					$query .= ', ';
+				}
 
 				$query .= $this->escapeColumn( $property ) ."= ?";
 
@@ -363,9 +365,9 @@ class Entity
 	 * @param string $table
 	 * @return  int
 	 */
-	function Create( $table, $id_value = null )
+	public function create( $table, $id_value = null )
 	{
-		$this->GetSchema();
+		$this->getSchema();
 		$id = & $this->id_name;
 		$column = $this->schema[ 1 ];
 
@@ -393,7 +395,7 @@ class Entity
 	 * @param string $class
 	 * @return object
 	 */
-	function GetFirstResult( $query, $arguments = null, $class = __CLASS__ )
+	public function getFirstResult( $query, $arguments = null, $class = __CLASS__ )
 	{
 		if( $query )
 		{
@@ -406,10 +408,10 @@ class Entity
 		}
 	}
 
-	function PreDelete() {}
-	function FlushCache() {}
+	public function preDelete() {}
+	public function flushCache() {}
 
-	function Delete()
+	public function delete()
 	{
 		$this->PreDelete();
 
@@ -421,11 +423,11 @@ class Entity
 	 * Gets all entries from database
 	 * @param $class string class name
 	 */
-	static function GetAll( $class = null )
+	public static function getAll( $class )
 	{
 		if( !$class )
 		{
-			throw new EntityException( "Entity::GetAll - class name cannot be null." );
+			throw new EntityException( "Entity::getAll - class name cannot be null." );
 		}
 
 		$object = new $class;
@@ -448,9 +450,9 @@ class Entity
 	 * Gets input and sets into object cproperties
 	 * @param const $method
 	 */
-	public function SetProperties( $method = INPUT_POST )
+	public function setProperties( $method = INPUT_POST )
 	{
-		$input = Common::Inputs( $this->GetSchema(), $method );
+		$input = Common::inputs( $this->getSchema(), $method );
 
 		foreach( $this->schema as &$property )
 		{
@@ -462,19 +464,19 @@ class Entity
 	 * Returns schema
 	 * @return array
 	 */
-	public function GetSchema()
+	public function getSchema()
 	{
 		if( count( $this->schema ) < 1 )
 		{
-			$this->schema = $this->BuildSchema();
+			$this->schema = $this->buildSchema();
 		}
 
 		return $this->schema;
 	}
 
-	public function InSchema( $key )
+	public function inSchema( $key )
 	{
-		if( $this->GetSchema() ) foreach( $this->schema as &$schema_key )
+		if( $this->getSchema() ) foreach( $this->schema as &$schema_key )
 		{
 			if( $key == $schema_key )
 			{
@@ -487,7 +489,7 @@ class Entity
 	 * Converts array into object
 	 * @return object
 	 */
-	public static function Array2Entity( $array, $class )
+	public static function array2Entity( $array, $class )
 	{
 		if( $array )
 		{
