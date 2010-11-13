@@ -44,7 +44,7 @@
 			return filter_input( $method, $name );
 		}
 
-		private function SetCheckbox()
+		protected function SetCheckbox()
 		{
 			if( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' )
 			{
@@ -69,15 +69,15 @@
 
 		// validators
 
-		private function Required( $error_text = "This field is required." )
+		protected function Required( $error_text = null )
 		{
 			if( strlen( $this->value ) < 1 )
 			{
-				$this->error[] = $error_text;
+				$this->error[] = !is_null( $error_text ) ? $error_text : "This field is required." ;
 			}
 		}
 
-		private function Match( $error_text, $value )
+		protected function Match( $error_text, $value )
 		{
 			if( $this->value != $value )
 			{
@@ -88,7 +88,7 @@
 			}
 		}
 
-		private function Length(  $error_text = null, $min_length = null, $max_length = null )
+		protected function Length( $error_text = null, $min_length = null, $max_length = null )
 		{
 			if( $min_length && !$max_length )
 			{
@@ -122,7 +122,7 @@
 			}
 		}
 
-		private function Email( $error_text = null )
+		protected function Email( $error_text = null )
 		{
 			if( !preg_match( "/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/", $this->value ) )
 			{
@@ -133,7 +133,7 @@
 			}
 		}
 
-		private function InDatabase( $error_text, $table, $column )
+		protected function InDatabase( $error_text, $table, $column )
 		{
 			if( !$this->value )
 				return false;
@@ -152,7 +152,7 @@
 			}
 		}
 
-		private function NotInDatabase( $error_text, $table, $column )
+		protected function NotInDatabase( $error_text, $table, $column )
 		{
 			if( !$this->value )
 				return false;
@@ -170,11 +170,11 @@
 
 		}
 
-		private function Checked( $error_text = "This field is required." )
+		protected function Checked( $error_text = null )
 		{
 			if( isset( $this->checked ) && $this->checked != 'checked' )
 			{
-				$this->error[] = $error_text;
+				$this->error[] = !is_null( $error_text ) ? $error_text : "This field is required." ;
 			}
 		}
 
