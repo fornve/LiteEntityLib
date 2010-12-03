@@ -8,7 +8,6 @@
 		<tr{if $field->error|@count} class="error"{/if}>
 			<th>
 				<label for="{$name}">{$field->label}</label>
-				{if $field->description}<br /><span class="field_description">{$field->description}</span>{/if}
 			</th>
 			<td>
 				{if $field->type == 'password'}
@@ -105,6 +104,7 @@
 						{if $field->disabled} disabled="disabled"{/if}
 					/>
 				{/if}
+				{if $field->description}<br /><span class="field_description">{$field->description}</span>{/if}
 			</td>
 			<td>
 				{foreach from=$field->error item=error name=error_loop}

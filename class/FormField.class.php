@@ -5,6 +5,31 @@
 		public $checked = null;
 		public $error = null;
 
+		/*
+		 * Name of field - <input name="{$field->name}" ...
+		 */
+		public $name = null;
+
+		/*
+		 * Label text for field
+		 */
+		public $label = null;
+
+		/*
+		 * Field type, can be one of: text, textarea, select, checkbox, radio, hidden
+		 */
+		public $type = 'text';
+
+		/*
+		 * Field description text
+		 */
+		public $description = null;
+
+		/*
+		 * Options for select field. Must be associative array with key as option value, and value as option text.
+		 */
+		public $options = array();
+
 		function __construct( $name, $label, $type = 'text', $default = null )
 		{
 			$this->name = $name;
