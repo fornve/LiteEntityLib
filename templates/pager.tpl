@@ -14,7 +14,7 @@
 			<li><span class="inactive"> &lt;</span><a href="{$pager->self}/{$pager->page-1}/{$pager->option}">Previous</a></li>
 		{else}
 			<li class="inactive"> &lt;&nbsp;Previous</li>
-		{/if}zip backup-gist-all-2010-11-04.zip assets/ backup/
+		{/if}
 	{if $pager->page < 6}
 		{section name=pagerloop loop=$pager->elements_loop max=$pager->CountPages() start=1}
 			{if 1 neq $smarty.section.pagerloop.index}<li class="divider"><span class="inactive"> | </span></li>{/if}
