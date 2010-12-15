@@ -197,7 +197,7 @@
 
 		protected function Checked( $error_text = null )
 		{
-			if( isset( $this->checked ) && $this->checked != 'checked' )
+			if( !isset( $this->checked ) || $this->checked != 'checked' )
 			{
 				$this->error[] = !is_null( $error_text ) ? $error_text : "This field is required." ;
 			}
