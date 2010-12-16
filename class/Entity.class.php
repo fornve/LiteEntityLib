@@ -149,11 +149,17 @@ class Entity
 
 		try
 		{
-			$timer = microtime( true );
+			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			{
+				$timer = microtime( true );
+			}
 
 			$result = self::$db->query( $query );
 
-			$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
+			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			{
+				$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
+			}
 
 			$this->db_query_counter++;
 
@@ -200,7 +206,20 @@ class Entity
 
 		try
 		{
+			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			{
+				$timer = microtime( true );
+			}
+
 			$this->schema = self::$db->buildSchema( $this->table_name );
+
+		if( count( $this->schema ) > 0 )
+			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			{
+				$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
+				$_SESSION[ 'entity_query' ][] = "[{$timer}] Schema build for '{$this->table_name}'";
+			}
+
 		}
 		catch( DbException $e )
 		{
