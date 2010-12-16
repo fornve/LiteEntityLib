@@ -10,8 +10,7 @@
  */
 class Entity
 {
-	private static $dblink;
-	protected $db;
+	protected static $db;
 	protected $prefix = null;
 	protected $multi_query = false;
 	public $db_query_counter = 0;
@@ -32,7 +31,7 @@ class Entity
 
 	function __construct()
 	{
-		$this->db = Entity::getDB();
+		Entity::getDB();
 
 		if( !$this->table_name )
 		{
@@ -40,14 +39,14 @@ class Entity
 		}
 	}
 
-	public static function &getDB()
+	public static function getDB()
 	{
-		if( !is_object( self::$dblink ) )
+		if( !is_object( self::$db ) )
 		{
-			self::$dblink = self::Connect();
+			self::$db = self::Connect();
 		}
 
-		return self::$dblink;
+		return self::$db;
 	}
 
 	public static function &getInstance()
@@ -96,9 +95,9 @@ class Entity
 
 		try
 		{
-			$result = $this->db->query( $query );
+			$result = self::$db->query( $query );
 
-			$this->error = $this->db->error;
+			$this->error = self::$db->error;
 			$this->query = $query;
 
 			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
@@ -152,7 +151,7 @@ class Entity
 		{
 			$timer = microtime( true );
 
-			$result = $this->db->query( $query );
+			$result = self::$db->query( $query );
 
 			$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
 
@@ -201,7 +200,7 @@ class Entity
 
 		try
 		{
-			$this->schema = $this->db->buildSchema( $this->table_name );
+			$this->schema = self::$db->buildSchema( $this->table_name );
 		}
 		catch( DbException $e )
 		{
@@ -438,12 +437,12 @@ class Entity
 
 	public function escapeTable( $string )
 	{
-		return $this->db->escapeTable( $string );
+		return self::$db->escapeTable( $string );
 	}
 
 	public function escapeColumn( $string )
 	{
-		return $this->db->escapeColumn( $string );
+		return self::$db->escapeColumn( $string );
 	}
 
 	/**
@@ -524,7 +523,7 @@ class Entity
 
 	private function buildResult( $result, $class )
 	{
-		return $this->db->fetch( $result, $class );
+		return self::$db->fetch( $result, $class );
 	}
 
 	/**
@@ -566,11 +565,11 @@ class Entity
 		{
 			if( is_object( $argument ) )
 			{
-				$argument = $this->db->escapeData( $this->db->escape( $argument->id ) );
+				$argument = self::$db->escapeData( self::$db->escape( $argument->id ) );
 			}
 			elseif( !is_numeric( $argument ) and isset( $argument ) )
 			{
-				$argument = $this->db->escapeData( $this->db->escape( $argument ) );
+				$argument = self::$db->escapeData( self::$db->escape( $argument ) );
 			}
 			elseif( !isset( $argument ) )
 			{
