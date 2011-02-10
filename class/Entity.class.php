@@ -64,7 +64,7 @@ class Entity
 		$driver = isset( self::$driver ) ? self::$driver : Config::get( 'DB_TYPE' );
 		$dsn	= isset( self::$dsn ) ? self::$dsn : Config::get( 'DSN' );
 
-		require_once( INCLUDE_PATH ."/drivers/{$driver}.class.php" );
+		require_once( INCLUDE_PATH ."/drivers/entity/{$driver}.class.php" );
 
 		return new $driver( $dsn );
 	}
