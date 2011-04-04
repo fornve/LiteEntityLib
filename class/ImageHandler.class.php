@@ -40,7 +40,7 @@
 
 		// image manipulation methods
 
-		private function Load( $file )
+		protected function Load( $file )
 		{
 			$image = imagecreatefromstring( file_get_contents( $file ) );
 			
@@ -54,7 +54,7 @@
 			return $image;
 		}
 
-		private function DetectImageMimeType()
+		protected function detectImageMimeType()
 		{
 			$valid_extensions = array( 'jpg' => 'jpeg', 'jpeg' => 'jpeg', 'png' => 'png' );
 			
@@ -64,11 +64,11 @@
 			$this->file_type = $valid_extensions[ $extension ];
 		}
 
-		private function GetImageDimensions( $file )
+		protected function getImageDimensions( $file )
 		{
 			if( $this->file != $file )
 			{
-				$image = $this->Load( $file );
+				$image = $this->load( $file );
 			}
 			else
 			{
@@ -82,7 +82,7 @@
 			return $dimensions;
 		}
 
-		private function AddBorders()
+		protected function addBorders()
 		{
 			$xpos = 0;
 			$ypos = 0;
@@ -126,7 +126,7 @@
 
 		}
 
-		private function Resize( $source_image )
+		protected function resize( $source_image )
 		{
 			// default - stretch image
 
@@ -145,9 +145,9 @@
 			return $destination_image;
 		}
 
-		// private methods
+		// protected methods
 
-		private function GetCacheFilename()
+		protected function getCacheFilename()
 		{
 			if( is_array( $this->options ) )
 			{
@@ -164,7 +164,7 @@
 			}
 		}
 
-		private function GenerateCache()
+		protected function generateCache()
 		{
 			if( $this->force_regeneration && file_exists( $this->cache_filename ) ) // force thumbnail regeneration
 			{
@@ -173,11 +173,11 @@
 
 			if( $this->width && $this->add_borders )
 			{
-				$image = $this->AddBorders();
+				$image = $this->addBorders();
 			}
 			elseif( $this->width || $this->height )
 			{
-				$image = $this->Resize( $this->image );
+				$image = $this->resize( $this->image );
 			}
 			else
 			{
@@ -204,33 +204,41 @@
 			}
 		}
 
-		private function GetSourceDimensions()
+		protected function getSourceDimensions()
 		{
-			$dimensions = $this->GetImageDimensions( $this->file );
+			$dimensions = $this->getImageDimensions( $this->file );
 			$this->source_width = $dimensions[ 'width' ];
 			$this->source_height = $dimensions[ 'height' ];
 			$this->source_ratio = $dimensions[ 'ratio' ];
-			
+
+			if( !$this->width && !$this->height )
+			{
+				$this->width = $this->source_width;
+				$this->height = $this->source_height;
+			}
+
 			if( !$this->width )
 			{	
-				$this->width = $this->source_width;
+				$resize = $this->height / $this->source_height;
+				$this->width = (int) floor( $this->source_width * $resize );
 			}
 			
 			if( !$this->height )
 			{
-				$this->height = $this->source_height;
+				$resize = $this->width / $this->source_width;
+				$this->height = (int) floor( $this->source_height * $resize );
 			}
 		}
 
-		private function Process()
+		protected function process()
 		{
-			$this->GetCacheFilename();
+			$this->getCacheFilename();
 
 			if( !file_exists( $this->cache_file ) || $this->force_regeneration )
 			{
-				$this->image = $this->Load( $this->file );
-				$this->GetSourceDimensions();
-				$this->GenerateCache();
+				$this->image = $this->load( $this->file );
+				$this->getSourceDimensions();
+				$this->generateCache();
 			}
 			else
 			{
