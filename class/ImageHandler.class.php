@@ -130,11 +130,11 @@
 		{
 			// default - stretch image
 
-			if( $this->height < 0 || $this->height === null ) // fit to width
+			if( $this->height < 1 || $this->height === null ) // fit to width
 			{
 				$this->height = (int)ceil( $this->width / $this->source_ratio );
 			}
-			elseif( !$this->width < 0 || $this->height === null ) // fit to height
+			elseif( !$this->width < 1 || $this->height === null ) // fit to height
 			{
 				$this->width = (int)ceil( $this->height * $this->source_ratio );
 			}
