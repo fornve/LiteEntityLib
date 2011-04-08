@@ -43,14 +43,50 @@
 		protected function Load( $file )
 		{
 			$image = imagecreatefromstring( file_get_contents( $file ) );
+			$background = imagecolorallocatealpha( $image, 255, 255, 255, 0 );
 			
 			if( !$image )
 			{
-				error_log( "[ImageHandler Error]: Image {$file} not loaded." );
-				exit;
+				throw new Exception( "Image {$file} not loaded." );
 			}
-			
-			error_log("{$file} loaded.");
+
+			$exif = exif_read_data( $file );
+
+			switch( $exif[ 'Orientation' ] )
+			{
+				case 1: // nothing
+				break;
+
+				case 2: // horizontal flip
+				//	$image->flipImage($public,1);
+				break;
+									   
+				case 3: // 180 rotate left
+					$image = imagerotate( $image, 180, $background );
+				break;
+						   
+				case 4: // vertical flip
+				//	$image->flipImage($public,2);
+				break;
+					   
+				case 5: // vertical flip + 90 rotate right
+				//	$image->flipImage($public, 2);
+						$image = imagerotate( $image, -90, $background );
+				break;
+					   
+				case 6: // 90 rotate right
+					$image = imagerotate( $image, -90, $background );
+				break;
+					   
+				case 7: // horizontal flip + 90 rotate right
+				//	$image->flipImage($public,1);   
+					$image = imagerotate( $image, -90, $background );
+				break;
+					   
+				case 8:    // 90 rotate left
+					$image = imagerotate( $image, 90, $background );
+				break;
+			}			
 			return $image;
 		}
 
@@ -242,7 +278,7 @@
 			}
 			else
 			{
-				error_log( "Read from cache: {$this->filename}" );
+			//	error_log( "Read from cache: {$this->filename}" );
 			}
 		}
 
