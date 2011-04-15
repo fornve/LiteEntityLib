@@ -1,29 +1,19 @@
 <?php
-/**
- * Imageserver Uploader
- * 
- * Copyright (c) 2009 Marek Dajnowski
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+/*
+ * Copyright (C) 2009 Marek Dajnowski <marek@dajnowski.net>
  *
- * @author Marek Dajnowski [marek@dajnowski.net] [http://sum-e.com/]
- * @version 0.1 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 class ImageserverUploader {
 	protected $token;
@@ -32,7 +22,7 @@ class ImageserverUploader {
 	private $upload_endpoint;
 	private $delete_endpoint;
 
-	public function __construct( $service, $token ) 
+	public function __construct( $service, $token )
 	{
 		$this->upload_endpoint = Config::get( 'imageserver.endpoint.upload' );
 		$this->delete_endpoint = Config::get( 'imageserver.endpoint.delete' );
@@ -43,11 +33,11 @@ class ImageserverUploader {
 			throw new Exception('ImageserverUploader requires the cURL extension.');
 		}
 
-		$this->service = $service; 
+		$this->service = $service;
 		$this->token = $token;
 	}
 
-	public function upload( $filename, $remoteDir='/' ) 
+	public function upload( $filename, $remoteDir='/' )
 	{
 		if (!file_exists($filename) or !is_file($filename) or !is_readable($filename))
 		{
@@ -59,11 +49,11 @@ class ImageserverUploader {
 			throw new Exception("Remote directory must be a string, is ".gettype($remoteDir)." instead.");
 		}
 
-		$data = $this->request( $this->upload_endpoint, true, 
+		$data = $this->request( $this->upload_endpoint, true,
 			array(
-				'plain' => 'yes', 
-				'file' => '@'.$filename, 
-				'dest' => $remoteDir, 
+				'plain' => 'yes',
+				'file' => '@'.$filename,
+				'dest' => $remoteDir,
 				'token' => $this->token,
 				'service' => $this->service
 			));
@@ -75,7 +65,7 @@ class ImageserverUploader {
 		/*if (strpos($data, 'HTTP/1.1 200 OK') === false)
 			return false;
 
-		return true;*/ 
+		return true;*/
 	}
 
 	public function delete( $filename, $remoteDir = '/' )
@@ -91,10 +81,10 @@ class ImageserverUploader {
 		if (strpos($data, 'HTTP/1.1 200 OK') === false)
 			return false;
 
-		return true; 
+		return true;
 	}
 
-	protected function request($url, $post=false, $postData=array()) 
+	protected function request($url, $post=false, $postData=array())
 	{
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -104,14 +94,14 @@ class ImageserverUploader {
 			curl_setopt($ch, CURLOPT_POST, $post);
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
 		}
-		
+
 		$data = curl_exec($ch);
-		
+
 		if ($data === false)
 			throw new Exception('Cannot execute request: '.curl_error($ch));
-		
+
 		curl_close($ch);
-		
+
 		return $data;
 	}
 }

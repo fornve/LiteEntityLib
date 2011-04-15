@@ -1,10 +1,26 @@
+{*
+ * Copyright (C) 2009 Marek Dajnowski <marek@dajnowski.net>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *}
 {strip}
 <form method="{$form->method}" action="{$form->action}"{if $form->file_upload} enctype="multipart/form-data"{/if} class="autoform {if $form->class}{$form->class}{/if}"{if $form->onsubmit} onsubmit="{$form->onsubmit}"{/if}{if $form->id} id="{$form->id}"{/if}>
 	<table>
 		{foreach from=$form->fields key=name item=field}
 		{if $field->type == 'hidden'}
 			<input type="hidden" id="{$name}" name="{$name}" value="{if $field->value}{$field->value}{/if}" />
-		{else}	
+		{else}
 		<tr{if $field->error|@count} class="error"{/if}>
 			<th>
 				<label for="{$name}">{$field->label}</label>
