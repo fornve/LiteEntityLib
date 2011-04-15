@@ -17,7 +17,7 @@
 		/*
 		 * This method prepares all variables
 		 * Should not take any action
-		 * 
+		 *
 		 * @param file string path/filename to original file
 		 * @param width int Output with in pixels
 		 * @param height int Output height in pixels
@@ -31,7 +31,7 @@
 			$this->width = $width;
 			$this->height = $height;
 			$this->DetectImageMimeType();
-			
+
 			$uri = explode( '/', $file );
 			$this->filename = $uri[ count( $uri ) - 1 ];
 			unset( $uri[ count( $uri ) - 1 ] );
@@ -43,13 +43,13 @@
 		private function Load( $file )
 		{
 			$image = imagecreatefromstring( file_get_contents( $file ) );
-			
+
 			if( !$image )
 			{
 				error_log( "[ImageHandler Error]: Image {$file} not loaded." );
 				exit;
 			}
-			
+
 			error_log("{$file} loaded.");
 			return $image;
 		}
@@ -57,10 +57,10 @@
 		private function DetectImageMimeType()
 		{
 			$valid_extensions = array( 'jpg' => 'jpeg', 'jpeg' => 'jpeg', 'png' => 'png' );
-			
+
 			$filename = explode( '.',strtolower(  basename( $this->file ) ) );
 			$extension = $filename[ count( $filename ) - 1 ];
-			
+
 			$this->file_type = $valid_extensions[ $extension ];
 		}
 
@@ -106,9 +106,9 @@
 			}
 
 			$destination_image = imagecreatetruecolor( $this->width, $this->height );
-			
+
 			imagesavealpha( $destination_image, true );
-			
+
 			if( $this->file_type == 'jpeg' )
 			{
 				$background = imagecolorallocatealpha( $destination_image, 255, 255, 255, 0 );
@@ -117,7 +117,7 @@
 			{
 				$background = imagecolorallocatealpha( $destination_image, 255, 255, 255, 127 );
 			}
-			
+
 			imagefill( $destination_image, 0, 0, $background );
 
 			imagecopyresampled( $destination_image, $this->image, $xpos, $ypos, 0, 0, $width, $height, $this->source_width, $this->source_height );
@@ -141,7 +141,7 @@
 
 			$destination_image = imagecreatetruecolor( $this->width, $this->height );
 			$a = imagecopyresampled( $destination_image, $source_image, 0, 0, 0, 0, $this->width, $this->height, $this->source_width, $this->source_height );
-			
+
 			return $destination_image;
 		}
 
@@ -153,7 +153,7 @@
 			{
 				$options = implode( '-'. $this->options ) .'-';
 			}
-			
+
 			$this->cache_filename = "{$this->cache_prefix}{$this->filename}";
 			$this->cache_path = "{$this->width}x{$this->height}";
 			$this->cache_file = "{$this->cache_root}/{$this->cache_path}/{$this->cache_filename}";
@@ -183,7 +183,7 @@
 			{
 				$image = $this->image;
 			}
-			
+
 			if( $this->file_type == 'jpeg' )
 			{
 				$created = imagejpeg( $image, $this->cache_file, $this->jpeg_quality );
@@ -192,7 +192,7 @@
 			{
 				$created = imagepng( $image, $this->cache_file, 9 );
 			}
-			
+
 			if( $created )
 			{
 				error_log( "Image {$this->cache_file} created." );
@@ -210,12 +210,12 @@
 			$this->source_width = $dimensions[ 'width' ];
 			$this->source_height = $dimensions[ 'height' ];
 			$this->source_ratio = $dimensions[ 'ratio' ];
-			
+
 			if( !$this->width )
-			{	
+			{
 				$this->width = $this->source_width;
 			}
-			
+
 			if( !$this->height )
 			{
 				$this->height = $this->source_height;

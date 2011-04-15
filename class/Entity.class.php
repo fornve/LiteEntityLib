@@ -10,18 +10,56 @@
  */
 class Entity
 {
+	/*
+	 * Database driver link
+	 */
 	protected static $db;
+
+	/*
+	 * Table prefix - usefull for shared databases
+	 */
 	protected $prefix = null;
+
+	/*
+	 * Multi query switch - use very carefully
+	 */
 	protected $multi_query = false;
+
+	/*
+	 * Query counter for benchmarking
+	 */
 	public $db_query_counter = 0;
-	protected static $__CLASS__ = __CLASS__;
+
+	/*
+	 * Singleton holder
+	 */
 	protected static $instance = null;
+
+	/*
+	 * Schema - whoch represents column names in db
+	 */
 	protected $schema = array();
+
+	/*
+	 * Table name - if null, strtolower( __CLASS__ ) will be used as class name
+	 */
 	protected $table_name = null;
+
+	/*
+	 * Id name - 'id' as default
+	 */
 	protected $id_name = 'id';
+
+	/*
+	 * Nested multiple collection. As in kohana model - to be finished
+	 */
 	protected $has_many = array();
+
+	/*
+	 * Nested single collection. As in kohana model - to be finished
+	 */
 	protected $has_one = array();
-	
+
 	/*
 	 * Determines wether object is going to be saved or not
 	 */
@@ -112,7 +150,7 @@ class Entity
 
 		if( $result === null )
 		{
-			throw new EntityException( " Warning, query returned null. [ {$query} ] ", $arguments );
+			throw new EntityException( "Warning, query returned null. [ {$query} ] ", $arguments );
 		}
 	}
 
@@ -196,6 +234,7 @@ class Entity
 
 	/*
 	 * Builds DAO schema
+	 * @return array
 	 */
 	public function buildSchema()
 	{
@@ -275,7 +314,7 @@ class Entity
 
 	}
 
-    /** 
+    /**
 	 * Gets kids collection
 	 * @param   string  $child_class        Child class name
 	 * @param   string  $parent_class       Parent class name
@@ -283,12 +322,12 @@ class Entity
 	 * @return  array                       Returns array of objects
 	 */
 	protected final function childCollection( $parent_class, $parent_id )
-    {   
+    {
         $query = "SELECT * FROM ". $this->escapeTable( $this->table_name )." WHERE ". $this->escapeColumn( strtolower( $parent_class ) ) ." = ?";
         $entity = Entity::getInstance();
         return $entity->Collection( $query, array( $parent_id ), get_class( $this ) );
-    }   
-											
+    }
+
 	/**
 	 * Returns DAO object of first result (row) in given query
 	 * @param string $query
@@ -305,7 +344,7 @@ class Entity
 		$result = $object->GetFirstResult( $query, $arguments );
 
 		if( $result )
-		{ 
+		{
 			foreach( $result as $key => &$value )
 			{
 				$object->$key = $value;
@@ -321,6 +360,10 @@ class Entity
 		}
 	}
 
+	/*
+	 * Save object
+	 * Will update all properties in database as defined in $this->schema
+	 */
 	public function save()
 	{
 		$id = $this->id_name;
@@ -407,6 +450,7 @@ class Entity
 	}
 
 	/**
+	 * Get first result of query
 	 *
 	 * @param string $query
 	 * @param mixed $arguments
@@ -451,6 +495,7 @@ class Entity
 		$object = new $class;
 		$entity = Entity::getInstance();
 		$query = "SELECT * from ". $entity->escapeTable( $object->table_name ) ." ORDER BY ". $entity->escapeColumn( $object->id_name );
+
 		return $entity->Collection( $query, null, $class );
 	}
 
@@ -532,15 +577,7 @@ class Entity
 		$this->Query( $query, $arguments );
 	}*/
 
-	private static function getClass()
-	{
-		$implementing_class = Entity::$__CLASS__;
-		$original_class = __CLASS__;
-
-		return $original_class;
-	}
-
-	private function buildResult( $result, $class )
+	protected function buildResult( $result, $class )
 	{
 		return self::$db->fetch( $result, $class );
 	}
@@ -550,7 +587,7 @@ class Entity
 	 * @param string $query
 	 * @return string
 	 */
-	private function prefix( $query )
+	protected function prefix( $query )
 	{
 		//global $mosConfig_dbprefix; // joomla 1.0
 		if( defined( 'DB_TABLE_PREFIX' ) )
@@ -568,7 +605,7 @@ class Entity
 	 * @param mixed $arguments
 	 * @return string
 	 */
-	private function arguments( $query, $arguments = null )
+	protected function arguments( $query, $arguments = null )
 	{
 		$query = explode( '?', $query );
 		$i = 0;
@@ -640,35 +677,5 @@ class Entity
 		}
 
 		$this->$variable = $value;
-	} 
-
-	/**
-	 * Email error detais to administrator
-	 * @param db resource
-	 * @param mixed $arguments
-	 */
-	/*private function Error( $message, $attributes = null, $exception )
-	{
-		if( defined( 'DEVELOPER_EMAIL' ) )
-		{
-			$headers = "From: Entity crash at {". PROJECT_NAME ."}! <". DEVELOPER_EMAIL .">";
-			$message = "Entity object [". get_class( $this ) ."]: \n\n". var_export( $this, true ) ."\n\n{$break}\n\n".
-			"Arguments:\n\n".  var_export( $attributes, true ) ."\n\n{$break}\n".
-			"Error message:\n\n". $message ."\n\n{$break}\n\n".
-			"Server:\n\n". var_export( $_SERVER, true ) ."\n\n{$break}\n\n".
-			"POST:\n\n". var_export( $_POST, true ) ."\n\n{$break}\n\n".
-			"Session:\n\n". var_export( $_SESSION, true ) ."\n\n";
-//			"Backrtace\n\n". var_export( $exception->trace );
-
-			mail( DEVELOPER_EMAIL, 'Database entity Collection error', $message, $headers );
-		}
-
-		$e = new EntityException( $message, $exception );
-		$e->attributes = array(
-			'query' => $this->query,
-			'attributes' => $attributes
-		);
-
-		throw $e;
-	}*/
+	}
 }
