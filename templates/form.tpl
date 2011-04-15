@@ -1,5 +1,5 @@
 {strip}
-<form method="{$form->method}" action="{$form->action}"{if $form->file_upload} enctype="multipart/form-data"{/if} class="autoform {if $form->class}{$form->class}{/if}"{if $form->onsubmit} onsubmit="{$form->onsubmit}"{/if}>
+<form method="{$form->method}" action="{$form->action}"{if $form->file_upload} enctype="multipart/form-data"{/if} class="autoform {if $form->class}{$form->class}{/if}"{if $form->onsubmit} onsubmit="{$form->onsubmit}"{/if}{if $form->id} id="{$form->id}"{/if}>
 	<table>
 		{foreach from=$form->fields key=name item=field}
 		{if $field->type == 'hidden'}
