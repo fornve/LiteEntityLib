@@ -1,4 +1,20 @@
 <?php
+/*
+ * Copyright (C) 2009 Marek Dajnowski <marek@dajnowski.net>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 /**
  * @package framework
  * @subpackage entity
@@ -21,7 +37,7 @@ class Entity
 	protected $id_name = 'id';
 	protected $has_many = array();
 	protected $has_one = array();
-	
+
 	/*
 	 * Determines wether object is going to be saved or not
 	 */
@@ -275,7 +291,7 @@ class Entity
 
 	}
 
-    /** 
+    /**
 	 * Gets kids collection
 	 * @param   string  $child_class        Child class name
 	 * @param   string  $parent_class       Parent class name
@@ -283,12 +299,12 @@ class Entity
 	 * @return  array                       Returns array of objects
 	 */
 	protected final function childCollection( $parent_class, $parent_id )
-    {   
+    {
         $query = "SELECT * FROM ". $this->escapeTable( $this->table_name )." WHERE ". $this->escapeColumn( strtolower( $parent_class ) ) ." = ?";
         $entity = Entity::getInstance();
         return $entity->Collection( $query, array( $parent_id ), get_class( $this ) );
-    }   
-											
+    }
+
 	/**
 	 * Returns DAO object of first result (row) in given query
 	 * @param string $query
@@ -305,7 +321,7 @@ class Entity
 		$result = $object->GetFirstResult( $query, $arguments );
 
 		if( $result )
-		{ 
+		{
 			foreach( $result as $key => &$value )
 			{
 				$object->$key = $value;
@@ -640,7 +656,7 @@ class Entity
 		}
 
 		$this->$variable = $value;
-	} 
+	}
 
 	/**
 	 * Email error detais to administrator
