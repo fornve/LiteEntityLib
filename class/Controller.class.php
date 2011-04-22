@@ -213,7 +213,6 @@ class Controller
 		if( !$dir ) $dir = $this->smarty->template_dir;
 
 		$this->assign( 'logged_user', Session::get( 'logged_user' ) );
-		$this->assign( 'module', Module::Render( $this->uri, $this->controller, $this->action, $this->params ) );
 
 		try
 		{
@@ -255,7 +254,6 @@ class Controller
 
 	public function startup()
 	{
-		Site_Config::defineAll();
 	}
 
 	public function preDecorate()
