@@ -202,7 +202,21 @@ class ImageHandler
 	{
 		if( is_array( $this->options ) )
 		{
-			$options = implode( '-'. $this->options ) .'-';
+			// default - stretch image
+
+			if( $this->height < 1 || $this->height === null ) // fit to width
+			{
+				$this->height = (int)ceil( $this->width / $this->source_ratio );
+			}
+			elseif( !$this->width < 1 || $this->height === null ) // fit to height
+			{
+				$this->width = (int)ceil( $this->height * $this->source_ratio );
+			}
+
+			$destination_image = imagecreatetruecolor( $this->width, $this->height );
+			$a = imagecopyresampled( $destination_image, $source_image, 0, 0, 0, 0, $this->width, $this->height, $this->source_width, $this->source_height );
+
+			return $destination_image;
 		}
 
 		$this->cache_filename = "{$this->cache_prefix}{$this->filename}";

@@ -34,7 +34,7 @@
 						{if $field->disabled} disabled="disabled"{/if}
 					/>
 				{elseif $field->type == 'textarea' || $field->type == 'tiny_mce'}
-					<textarea id="{$name}" name="{$name}" id="{$name}"
+					<textarea name="{$name}" id="{if $field->id}{$field->id}{else}{$name}{/if}"
 						{if $field->class} class="{$field->class}"{/if}
 						{if $field->disabled} disabled="disabled"{/if}
 						{if $field->style} style="{$field->style}"{/if}
