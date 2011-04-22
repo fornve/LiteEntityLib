@@ -54,11 +54,12 @@
 						{if $field->style} style="{$field->style}"{/if}
 						{if $field->onclick} class="{$field->onclick}"{/if}
 						{if $field->disabled} disabled="disabled"{/if}
+						{if $field->multiple} multiple="multiple"{/if}
 						>
 						{foreach from=$field->options item=option key=value}
 							<option
 								{if $value} value="{$value}"
-								{if $value==$field->value} selected="selected"{/if}
+								{if $value==$field->value || ($field->multiple && in_array($value, $field->values))} selected="selected"{/if}
 									{else} value="{$option}"{if $option==$input->$name} selected="selected"{/if}
 								{/if}
 									>{$option}</option>

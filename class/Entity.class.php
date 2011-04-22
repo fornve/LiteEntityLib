@@ -178,8 +178,22 @@ class Entity
 	 * @return array
 	 * Returns array of objects
 	 */
-	public function collection( $query, $arguments = null, $class = __CLASS__, $limit = null, $offset = null )
+	public function collection( $query, $arguments = null, $class = null, $limit = null, $offset = null )
 	{
+		if( !$class && !function_exists( 'get_called_class' ) )
+		{
+			throw new EntityException( 'In PHP < 5.3 $class must be specified in ::collection' );
+		}
+		elseif( !$class )
+		{
+			$class = get_called_class();
+		}
+
+		if( strtolower( $class ) == 'entity' )
+		{
+			throw new EntityException( 'Something went wrong, entity class can not do ::collection on itself.' );
+		}
+
 		if( $limit )
 		{
 			if( $limit )
@@ -266,13 +280,15 @@ class Entity
 				$timer = microtime( true );
 			}
 
-			$this->schema = self::$db->buildSchema( $this->table_name );
+			$this->schema = self::$db->buildSchema( $this->getTableName() );
 
-		if( count( $this->schema ) > 0 )
-			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			if( count( $this->schema ) > 0 )
 			{
-				$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
-				$_SESSION[ 'entity_query' ][] = "[{$timer}] Schema build for '{$this->table_name}'";
+				if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+				{
+					$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
+					$_SESSION[ 'entity_query' ][] = "[{$timer}] Schema build for '{$this->table_name}'";
+				}
 			}
 
 		}
@@ -284,6 +300,16 @@ class Entity
 		return $this->schema;
 	}
 
+	public function getTableName()
+	{
+		if( !$this->table_name )
+		{
+			$this->table_name = get_class();
+		}
+
+		return $this->table_name;
+	}
+
 	/**
 	 * Retrieve row from database where id = $id ( or id => $id_name  )
 	 * @param int $id
@@ -292,8 +318,17 @@ class Entity
 	 * @return object
 	 * Returns object type of entity
 	 */
-	public static function retrieve( $id, $class = __CLASS__, $id_name = 'id' )
+	public static function retrieve( $id, $class = null, $id_name = 'id' )
 	{
+		if( !$class && !function_exists( 'get_called_class' ) )
+		{
+			throw new EntityException( 'In PHP < 5.3 $class must be specified in ::collection' );
+		}
+		elseif( !$class )
+		{
+			$class = get_called_class();
+		}
+
 		if( $id )
 		{
 			$object = new $class();
@@ -302,7 +337,7 @@ class Entity
 
 			$query = "SELECT * FROM ". $entity->escapeTable( $object->table_name ) ." WHERE ". $entity->escapeColumn( $id_name ) ." = ? LIMIT 1";
 
-			$object = $entity->GetFirstResult( $query, $id, $class );
+			$object = $entity->getFirstResult( $query, $id, $class );
 
 			if( !$object )
 			{
@@ -473,11 +508,11 @@ class Entity
 	 * @param string $class
 	 * @return object
 	 */
-	public function getFirstResult( $query, $arguments = null, $class = __CLASS__ )
+	public function getFirstResult( $query, $arguments = null, $class = null )
 	{
 		if( $query )
 		{
-			$this->Collection( $query, $arguments, $class );
+			$this->collection( $query, $arguments, $class );
 		}
 
 		if( isset( $this->result ) && isset( $this->result[ 0 ] ) )

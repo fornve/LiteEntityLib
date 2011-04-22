@@ -25,7 +25,7 @@ class mysql implements dbdriver
 
 	public function __construct( $dns )
 	{
-		$this->connect( $dns );
+		$return = $this->connect( $dns );
 	}
 
 	public function connect( $dns )
