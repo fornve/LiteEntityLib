@@ -115,10 +115,10 @@ class mysql implements dbdriver
 	{
 		if( is_object( $this->resource ) )
 		{
-			$thread_id = $mysqli->thread_id;
+			$thread_id = $this->resource->thread_id;
 			if( $thread_id )
 			{
-				$mysqli->kill( $thread_id );
+				$this->resource->kill( $thread_id );
 			}
 		}
 	}

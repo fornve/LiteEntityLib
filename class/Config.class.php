@@ -26,6 +26,11 @@ class Config
 
 	public static function get( $variable )
 	{
+		if( !isset( self::$data[ $variable ] ) )
+		{
+			return null;
+		}
+
 		return self::$data[ $variable ];
 	}
 }

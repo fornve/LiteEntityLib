@@ -17,9 +17,10 @@
  */
 class Filelog
 {
-	function Write( $contents )
+	public function Write( $contents )
 	{
-		$file = LOG_DIRECTORY .'/'. date( "Y-m-d" ) .'.log';
+		$log_directory = Config::get( 'log_directory' ) ? Config::get( 'log_directory' ) : LOG_DIRECTORY;
+		$file = $log_directory .'/'. date( "Y-m-d" ) .'.log';
 		$contents = date( "Y-m-d H:i:s - " ) ."{$contents}\n";
 		file_put_contents( $file, $contents, FILE_APPEND );
 	}

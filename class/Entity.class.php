@@ -536,7 +536,7 @@ class Entity
 	 * Gets all entries from database
 	 * @param $class string class name
 	 */
-	public static function getAll( $class )
+	public static function getAll( $class, $limit = null, $offset = null )
 	{
 		if( !$class )
 		{
@@ -547,7 +547,7 @@ class Entity
 		$entity = Entity::getInstance();
 		$query = "SELECT * from ". $entity->escapeTable( $object->table_name ) ." ORDER BY ". $entity->escapeColumn( $object->id_name );
 
-		return $entity->Collection( $query, null, $class );
+		return $entity->Collection( $query, null, $class, $limit, $offset );
 	}
 
 	public function escapeTable( $string )
@@ -722,7 +722,12 @@ class Entity
 
 	public function __set( $variable, $value )
 	{
-		if( in_array( $variable, $this->schema ) && $value !== $this->$variable)
+		if( !isset( $this->$variable ) )
+		{
+			 $this->$variable = null;
+		}
+
+		if( !in_array( $variable, $this->schema ) && $value !== $this->$variable )
 		{
 			$this->updated = true;
 		}
