@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *}
+
 {strip}
-<form method="{$form->method}" action="{$form->action}"{if $form->file_upload} enctype="multipart/form-data"{/if} class="autoform {if $form->class}{$form->class}{/if}"{if $form->onsubmit} onsubmit="{$form->onsubmit}"{/if}{if $form->id} id="{$form->id}"{/if}>
+<form method="{$form->method}" action="{$form->action}"{if $form->file_upload} enctype="multipart/form-data"{/if} class="autoform {if $form->class}{$form->class}{/if}"{if $form->onsubmit} onsubmit="{$form->onsubmit}"{/if}{if $form->id || $form->jquery_validate} id="{if $form->id}{$form->id}{else}form-{$form->action|md5}{/if}"{/if}>
 	<table>
 		{foreach from=$form->fields key=name item=field}
 		{if $field->type == 'hidden'}
@@ -24,6 +25,7 @@
 		<tr{if $field->error|@count} class="error"{/if}>
 			<th>
 				<label for="{$name}">{$field->label}</label>
+				{$field->label_html}
 			</th>
 			<td>
 				{if $field->type == 'password'}
@@ -122,6 +124,7 @@
 					/>
 				{/if}
 				{if $field->description}<br /><span class="field_description">{$field->description}</span>{/if}
+				{$field->html}
 			</td>
 			<td>
 				{foreach from=$field->error item=error name=error_loop}
@@ -132,14 +135,23 @@
 		{/if}
 		{/foreach}
 		<tr>
-			<td>
+			<td colspan="3">
 				{if $form->submit.type == 'image'}
 					<input type="image" src="{$form->submit.src}" alt="{$form->submit.value}"{if $form->submit.class} class="{$form->submit.class}"{/if} />
 				{else}
 					<input type="submit" value="{$form->submit.value}"{if $form->submit.class} class="{$form->submit.class}"{/if}{if $form->submit.onclick} onclick="{$form->submit.onclick}"{/if}{if $form->submit.style} style="{$form->submit.style}"{/if} />
 				{/if}
+				{$form->submit.html}
 			</td>
 		</tr>
 	</table>
 </form>
 {/strip}
+
+{if $form->jquery_validate}
+<script type="text/javascript">
+	jQuery(document).ready(function(){
+		jQuery('#{if $form->id}{$form->id}{else}form-{$form->action|md5}{/if}').validate();
+	});
+</script>
+{/if}

@@ -24,18 +24,22 @@ class Form
 	function __construct( $action = "/", $method = 'get' )
 	{
 		$this->action = $action;
-		$this->method = $method;
+		$this->method = strtolower( $method );
 
-		if( $method == strtolower( $_SERVER[ 'REQUEST_METHOD' ] ) )
+		if( $this->method == strtolower( $_SERVER[ 'REQUEST_METHOD' ] ) )
+		{
 			$this->posted = true;
+		}
 	}
 
-	function Validate()
+	function validate()
 	{
 		$error = 0;
 
 		if( !$this->posted )
+		{
 			return false;
+		}
 
 		if( $this->fields ) foreach( $this->fields as $field )
 		{
@@ -44,8 +48,12 @@ class Form
 		}
 
 		if( $error > 0 )
+		{
 			return false;
+		}
 		else
+		{
 			return true;
+		}
 	}
 }
