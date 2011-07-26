@@ -313,12 +313,11 @@ class Entity
 	/**
 	 * Retrieve row from database where id = $id ( or id => $id_name  )
 	 * @param int $id
-	 * @param string $id_name
 	 * @param string $class
 	 * @return object
 	 * Returns object type of entity
 	 */
-	public static function retrieve( $id, $class = null, $id_name = 'id' )
+	public static function retrieve( $id, $class = null )
 	{
 		if( !$class && !function_exists( 'get_called_class' ) )
 		{
@@ -335,7 +334,7 @@ class Entity
 			$object->buildSchema();
 			$entity = Entity::getInstance();
 
-			$query = "SELECT * FROM ". $entity->escapeTable( $object->table_name ) ." WHERE ". $entity->escapeColumn( $id_name ) ." = ? LIMIT 1";
+			$query = "SELECT * FROM ". $entity->escapeTable( $object->table_name ) ." WHERE ". $entity->escapeColumn( $object->id_name ) ." = ? LIMIT 1";
 
 			$object = $entity->getFirstResult( $query, $id, $class );
 
@@ -528,8 +527,11 @@ class Entity
 	{
 		$this->PreDelete();
 
-		$query = "DELETE FROM ". $this->escapeTable( $this->table_name ) ." WHERE ". $this->escapeColumn( $this->id_name ) ." = ?";
-		$this->query( $query, $this->id );
+		$id_name = $this->id_name;
+
+		$query = "DELETE FROM ". $this->escapeTable( $this->table_name ) ." WHERE ". $this->escapeColumn( $id_name ) ." = ?";
+		$id_name = $this->id_name;
+		$this->query( $query, $this->$id_name );
 	}
 
 	/**

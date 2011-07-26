@@ -114,7 +114,7 @@ class FormField
 	{
 		if( strlen( $this->value ) < 1 )
 		{
-			$this->error[] = !is_null( $error_text ) ? $error_text : "This field is required." ;
+			$this->error[] = !is_null( $error_text ) ? $error_text : __( "This field is required." );
 		}
 	}
 
@@ -123,7 +123,7 @@ class FormField
 		if( $this->value != $value )
 		{
 			if( !$error_text )
-				$error_text = "Does not match.";
+				$error_text = __( "Does not match." );
 
 			$this->error[] = $error_text;
 		}
@@ -136,7 +136,7 @@ class FormField
 			if( strlen( $this->value ) < $min_length )
 			{
 				if( !$error_text )
-					$error_text = "Must be at least {$min_length} characters long.";
+					$error_text = __( "Must be at least {$min_length} characters long." );
 
 				$this->error[] = $error_text;
 			}
@@ -146,7 +146,7 @@ class FormField
 			if( strlen( $this->value ) > $max_length )
 			{
 				if( !$error_text )
-					$error_text = "Must be up to {$max_length} characters long.";
+					$error_text = __( "Must be up to {$max_length} characters long." );
 
 				$this->error[] = $error_text;
 			}
@@ -168,19 +168,19 @@ class FormField
 		if( !preg_match( "/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/", $this->value ) )
 		{
 			if( !$error_text )
-				$error_text = "Must be valid email address.";
+				$error_text = __( "Must be valid email address." );
 
 			$this->error[] = $error_text;
 		}
 	}
 
-	protected function InDatabase( $error_text, $table, $column )
+	protected function inDatabase( $error_text, $table, $column )
 	{
 		if( !$this->value )
 			return false;
 
 		$entity = Entity::getInstance();
-		$query = "SELECT * FROM ". $entity->escapeTable( $table ) ." WHERE ". $entity->escapeColumn( $column ) ." = ?";
+		$query = "SELECT * FROM ". $entity->escapeTable( strtolower( $table ) ) ." WHERE ". $entity->escapeColumn( strtolower( $column ) ) ." = ?";
 
 		if( $entity->getFirstResult( $query, trim( $this->value ), ucfirst( $table ) ) )
 		{
@@ -199,9 +199,9 @@ class FormField
 			return false;
 
 		$entity = Entity::getInstance();
-		$query = "SELECT * FROM ". $entity->escapeTable( $table ) ." WHERE ". $entity->escapeColumn( $column ) ." = ?";
+		$query = "SELECT * FROM ". $entity->escapeTable( strtolower( $table ) ) ." WHERE ". $entity->escapeColumn( strtolower( $column ) ) ." = ?";
 
-		if( !$entity->GetFirstResult( $query, $this->value, $table ) )
+		if( !$entity->getFirstResult( $query, $this->value, ucfirst( $table ) ) )
 		{
 			if( !$error_text )
 				$error_text = 'Not in database';
@@ -215,7 +215,7 @@ class FormField
 	{
 		if( !isset( $this->checked ) || $this->checked != 'checked' )
 		{
-			$this->error[] = !is_null( $error_text ) ? $error_text : "This field is required." ;
+			$this->error[] = !is_null( $error_text ) ? $error_text : __( "This field is required." );
 		}
 	}
 

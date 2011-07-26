@@ -57,3 +57,14 @@ class Form
 		}
 	}
 }
+
+/*
+ * Translate function wrapper
+ */
+if( !function_exists( '__' ) )
+{
+	function __( $string )
+	{
+		return $string;
+	}
+}

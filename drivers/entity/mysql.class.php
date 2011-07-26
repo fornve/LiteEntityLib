@@ -22,6 +22,7 @@ require_once( 'dbexception.class.php' );
 class mysql implements dbdriver
 {
 	protected $resource;
+	public $error;
 
 	public function __construct( $dns )
 	{
