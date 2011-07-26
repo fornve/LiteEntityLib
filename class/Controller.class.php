@@ -18,6 +18,9 @@
 /**
  * @package LiteEntityLib
  */
+/*
+ * Deprectated legacy class, to be rebuilded
+ */
 class Controller
 {
 	public $uri = 'index/index';
