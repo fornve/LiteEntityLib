@@ -75,7 +75,7 @@ class FormField
 		}
 	}
 
-	static function GetInput( $name )
+	static function getInput( $name )
 	{
 		if( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' )
 			$method = INPUT_POST;
@@ -85,7 +85,7 @@ class FormField
 		return filter_input( $method, $name );
 	}
 
-	protected function SetCheckbox()
+	protected function setCheckbox()
 	{
 		if( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' )
 		{
@@ -103,14 +103,19 @@ class FormField
 		}
 	}
 
-	function Validation( $validation, $p1 = null, $p2 = null, $p3 = null, $p4 = null )
+	function validation( $validation, $p1 = null, $p2 = null, $p3 = null, $p4 = null )
 	{
 		$this->$validation( $p1, $p2, $p3, $p4 );
+
+		if( $this->error )
+		{
+			$this->row_class .= ' error';
+		}
 	}
 
 	// validators
 
-	protected function Required( $error_text = null )
+	protected function required( $error_text = null )
 	{
 		if( strlen( $this->value ) < 1 )
 		{
@@ -118,7 +123,7 @@ class FormField
 		}
 	}
 
-	protected function Match( $error_text, $value )
+	protected function match( $error_text, $value )
 	{
 		if( $this->value != $value )
 		{
@@ -129,7 +134,7 @@ class FormField
 		}
 	}
 
-	protected function Length( $error_text = null, $min_length = null, $max_length = null )
+	protected function length( $error_text = null, $min_length = null, $max_length = null )
 	{
 		if( $min_length && !$max_length )
 		{
@@ -163,7 +168,7 @@ class FormField
 		}
 	}
 
-	protected function Email( $error_text = null )
+	protected function email( $error_text = null )
 	{
 		if( !preg_match( "/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/", $this->value ) )
 		{
@@ -193,7 +198,7 @@ class FormField
 		}
 	}
 
-	protected function NotInDatabase( $error_text, $table, $column )
+	protected function notInDatabase( $error_text, $table, $column )
 	{
 		if( !$this->value )
 			return false;
@@ -211,7 +216,7 @@ class FormField
 
 	}
 
-	protected function Checked( $error_text = null )
+	protected function checked( $error_text = null )
 	{
 		if( !isset( $this->checked ) || $this->checked != 'checked' )
 		{

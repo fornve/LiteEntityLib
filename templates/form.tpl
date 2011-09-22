@@ -22,7 +22,7 @@
 		{if $field->type == 'hidden'}
 			<input type="hidden" id="{$name}" name="{$name}" value="{if $field->value}{$field->value}{/if}" />
 		{else}
-		<tr{if $field->error|@count} class="error"{/if}>
+			<tr{if $field->row_class} class="{$field->row_class}"{/if}>
 			<th>
 				<label for="{$name}">{$field->label}</label>
 				{$field->label_html}
@@ -126,7 +126,7 @@
 				{if $field->description}<br /><span class="field_description">{$field->description}</span>{/if}
 				{$field->html}
 			</td>
-			<td>
+			<td class="error-label">
 				{foreach from=$field->error item=error name=error_loop}
 					{$error}{if !$smarty.foreach.error_loop.last}<br />{/if}
 				{/foreach}
@@ -134,7 +134,7 @@
 		</tr>
 		{/if}
 		{/foreach}
-		<tr>
+		<tr{if $form->submit.row_class} class="{$form->submit.row_class}"{/if}>
 			<td colspan="3">
 				{if $form->submit.type == 'image'}
 					<input type="image" src="{$form->submit.src}" alt="{$form->submit.value}"{if $form->submit.class} class="{$form->submit.class}"{/if} />
