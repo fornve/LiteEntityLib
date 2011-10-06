@@ -59,7 +59,6 @@ class View
 			unset( $variable_value );
 		}
 
-		ob_end_flush();
 		ob_start();
 		include( $template );
 		$contents = ob_get_contents();

@@ -11,18 +11,14 @@ class Calendar
 {
 	public $events = array();
 
+	public $days = array( 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday' );
+	public $months = array( '', 'January', 'Febuary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' );
+
 	public function __construct( $now = null )
 	{
 		$now = $now ? $now : time();
 		$year = date('Y',$now);
 		$month = date('m',$now);
-
-		/**
-		 * want to start on sunday? use this array AND ( important! ) set $day_offset to 0 ( zero )
-		 * $days = array('sunday','monday','tuesday','wednesday','thursday','friday','saturday');
-		 */
-		$days = array('monday','tuesday','wednesday','thursday','friday','saturday','sunday');
-		$months = array('','january','febuary','march','april','may','june','july','august','september','october','november','december');
 
 		// day offset, 1 is monday, 0 is sunday
 		$day_offset = 1;
@@ -59,8 +55,6 @@ class Calendar
 		   $trow++;
 		}
 
-		$this->months = $months;
-		$this->days = $days;
 		$this->cal = $cal;
 		$this->month = abs($month);
 		$this->year = $year;
