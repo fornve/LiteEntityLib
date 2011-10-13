@@ -37,7 +37,7 @@ class ImageserverUploader {
 		$this->token = $token;
 	}
 
-	public function upload( $filename, $remoteDir='/' )
+	public function upload( $filename, $remoteDir = '/' )
 	{
 		if (!file_exists($filename) or !is_file($filename) or !is_readable($filename))
 		{
