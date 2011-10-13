@@ -17,24 +17,29 @@
  */
 class Pager
 {
-	public $max = 0;		// number of elements
+	public $max = 0;		// number of elements (limit)
 	public $elements = 10;	// elements on page
 	public $page = 1;		// current page
 	public $self = '/';		// base url
 	public $option = null;	// filter option
 	public $order = null;	// result order option
+	public $offset;			// Element offset = ( page - 1 ) * elements
 
 	public $elements_loop = null; // read only
 
-	function __construct( $self, $max, $page = 1 )
+	function __construct( $self, $max, $page = 1, $elements = 10 )
 	{
 		$this->self = $self;
 		$this->max = $max;
+		$this->elements = $elements;
 
 		if( $page < 1 )
+		{
 			$page = 1;
+		}
 
 		$this->page = $page;
+		$this->offset = ( $this->page - 1 ) * $this->elements;
 
 		$this->elements_loop = $this->elements + 1;
 	}

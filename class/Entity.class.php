@@ -722,6 +722,46 @@ class Entity
 		return $str;
 	}
 
+	/*
+	 * Return limited array - something like SQL's LIMIT
+	 */
+	public static function limitArray( $array, $limit = null, $offset = null )
+	{
+		if( $limit === null && $offset === null )
+		{
+			return $array;
+		}
+
+		if( !is_array( $array ) || empty( $array ) )
+		{
+			return $array;
+		}
+
+		$offset_counter = 0;
+		$limit_counter = 1;
+
+		$result_array = array();
+
+		foreach( $array as $index => $item )
+		{
+			if( $offset_counter >= $offset || $offset_counter === null )
+			{
+				if( $limit_counter <= $limit || $limit === null )
+				{
+					$result_array[ $index ] = $item;
+					var_dump( $limit_counter );
+					$limit_counter++;
+				}
+			}
+
+			$offset_counter++;
+		}
+
+		unset( $offset_counter, $limit_counter );
+
+		return $result_array;
+	}
+
 	public function __set( $variable, $value )
 	{
 		if( !isset( $this->$variable ) )
