@@ -33,4 +33,9 @@ class Config
 
 		return self::$data[ $variable ];
 	}
+
+	public static function _( $variable )
+	{
+		return self::get( $variable );
+	}
 }

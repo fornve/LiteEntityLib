@@ -749,7 +749,6 @@ class Entity
 				if( $limit_counter <= $limit || $limit === null )
 				{
 					$result_array[ $index ] = $item;
-					var_dump( $limit_counter );
 					$limit_counter++;
 				}
 			}

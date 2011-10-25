@@ -44,7 +44,7 @@ class Pager
 		$this->elements_loop = $this->elements + 1;
 	}
 
-	function CountPages()
+	function countPages()
 	{
 		return ceil( $this->max / $this->elements );
 	}

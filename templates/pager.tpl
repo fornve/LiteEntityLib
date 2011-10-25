@@ -14,6 +14,57 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *}
+{if $apply_pager_css}
+<style type="text/css">
+
+ul.pager { border:0; margin: 10px 0 0 0; padding:0; }
+
+.pager li
+{
+	color:#000;
+	display:block;
+	float:left;
+	font-size:11px;
+	list-style:none;
+	display: inline;
+	border:solid 1px #808080;
+	margin-right:2px;
+	padding: 3px 5px;
+}
+
+.pager .previous-off, .pager .next-off
+{
+	color:#888;
+	display:block;
+	float:left;
+	font-weight:bold;
+	margin-right:2px;
+	padding:0px 4px;
+}
+
+.pager .next a, .pager .previous a
+{
+	font-weight:bold;
+}
+
+.pager li.active
+{
+	background:#808080;
+}
+
+.pager li a, .pager li span
+{
+	color:#000;
+	padding:3px 6px;
+	text-decoration:none;
+}
+
+.pager li:hover			{ border:solid 1px #a0a0a0; }
+.pager .divider			{ display: none; }
+
+</style>
+{/if}
+
 {if $pager}
 {strip}
 {assign var=min value=$pager->page*$pager->elements-5-$pager->elements}
