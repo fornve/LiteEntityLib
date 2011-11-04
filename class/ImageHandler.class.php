@@ -28,6 +28,7 @@ class ImageHandler
 	public $add_borders = false;
 	public $jpeg_quality = 100; // int {0-100} - 100 means 100% quality
 	public $limit = 1600; // height / width limit (in pixels)
+	public $zoom_up = true; // Should system zoom up smaller images to requested height?
 
 	/*
 	 * This method prepares all variables
@@ -135,13 +136,22 @@ class ImageHandler
 
 	protected function addBorders()
 	{
+
+		if( !$this->zoom_up && ( $this->width > $this->source_width || $this->height > $this->source_height ) )
+		{
+			$this->width = $this->source_width;
+			$this->height = $this->source_height;
+		}
+
 		$xpos = 0;
 		$ypos = 0;
 		$width = $this->width;
 		$height = $this->height;
 
 		if( !$this->width || !$this->source_height ) // check if image sizes are > than 0
+		{
 			return $this->file;
+		}
 
 		if( $this->source_width / $this->source_height > 1 && $width / $height >= 1  ) // fit to width
 		{
@@ -188,6 +198,12 @@ class ImageHandler
 		elseif( !$this->width < 1 || $this->height === null ) // fit to height
 		{
 			$this->width = (int)ceil( $this->height * $this->source_ratio );
+		}
+
+		if( !$this->zoom_up && ( $this->width > $this->source_width || $this->height > $this->source_height ) )
+		{
+			$this->width = $this->source_width;
+			$this->height = $this->source_height;
 		}
 
 		$destination_image = imagecreatetruecolor( $this->width, $this->height );
@@ -313,13 +329,13 @@ class ImageHandler
 
 	// public methods
 
-	public function GetUrl()
+	public function getUrl()
 	{
 		$this->Process();
 		return "Cached/{$this->cache_path}/{$this->cache_dir}";
 	}
 
-	public function Output()
+	public function output()
 	{
 		// max height / width limit
 		if( $this->width > $this->limit )
