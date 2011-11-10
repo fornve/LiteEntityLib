@@ -161,7 +161,9 @@ class Entity
 		}
 		catch( DbException $e )
 		{
-			throw new EntityException( $e->getMessage(), $arguments, $e );
+			$exception = new EntityException( $e->getMessage(), $arguments, $e );
+			$exception->query = $query;
+			throw $exception;
 		}
 
 		if( $result === null )
@@ -204,10 +206,10 @@ class Entity
 			if( $offset > 0 )
 			{
 				$query .= ", ?";
-				$arguments[] = $offset;
+				$arguments[] = (int) $offset;
 			}
 
-			$arguments[] = $limit;
+			$arguments[] = (int) $limit;
 		}
 
 		$query = $this->Prefix( $query );
@@ -243,7 +245,9 @@ class Entity
 		}
 		catch( DbException $e )
 		{
-			throw new EntityException( $e->getMessage(), $arguments, $e );
+			$exception = new EntityException( $e->getMessage(), $arguments, $e );
+			$exception->query = $query;
+			throw $exception;
 		}
 
 		if( $class && isset( $this->result ) )
