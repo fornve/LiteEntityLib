@@ -142,10 +142,23 @@ class ImageHandler
 	protected function addBorders()
 	{
 
-		if( !$this->zoom_up && ( $this->width > $this->source_width || $this->height > $this->source_height ) )
+		if( !$this->zoom_up )
 		{
-			$this->width = $this->source_width;
-			$this->height = $this->source_height;
+			if( $this->width > $this->source_width && $this->height > $this->source_height )
+			{
+				$this->width = $this->source_width;
+				$this->height = $this->source_height;
+			}
+			elseif( $this->width > $this->source_width && $this->height < $this->source_height )
+			{
+				$this->width = $this->source_width;
+				$this->height = $this->height;
+			}
+			elseif( $this->width < $this->source_width && $this->height > $this->source_height )
+			{
+				$this->height = $this->source_height;
+				$this->width = $this->width;
+			}
 		}
 
 		$xpos = 0;
@@ -205,10 +218,23 @@ class ImageHandler
 			$this->width = (int)ceil( $this->height * $this->source_ratio );
 		}
 
-		if( !$this->zoom_up && ( $this->width > $this->source_width || $this->height > $this->source_height ) )
+		if( !$this->zoom_up )
 		{
-			$this->width = $this->source_width;
-			$this->height = $this->source_height;
+			if( $this->width > $this->source_width && $this->height > $this->source_height )
+			{
+				$this->width = $this->source_width;
+				$this->height = $this->source_height;
+			}
+			elseif( $this->width > $this->source_width && $this->height < $this->source_height )
+			{
+				$this->width = $this->source_width;
+				$this->height = $this->height;
+			}
+			elseif( $this->width < $this->source_width && $this->height > $this->source_height )
+			{
+				$this->height = $this->source_height;
+				$this->width = $this->width;
+			}
 		}
 
 		$destination_image = imagecreatetruecolor( $this->width, $this->height );
