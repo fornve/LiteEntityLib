@@ -50,7 +50,7 @@ class ImageHandler
 		$this->DetectImageMimeType();
 
 		$uri = explode( '/', $file );
-		$this->filename = $uri[ count( $uri ) - 1 ];
+		$this->filename = str_replace( array( '/', '.' ), array( '-', '-' ), $file );
 		unset( $uri[ count( $uri ) - 1 ] );
 		$this->path = '/'. implode( '/', $uri );
 	}
