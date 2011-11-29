@@ -6,7 +6,7 @@
 	{assign var=t_year value=$calendar->year}
 {/if}
 
-{if $month == 12}
+{if $calendar->month == 12}
 	{assign var=v_month value=1}
 	{math equation='( y + 1 )' y=$calendar->year assign=v_year}
 {else}
@@ -36,14 +36,14 @@
 		{foreach from=$calendar->cal item=i}
 			<tr>
 				{foreach from=$i item=o}
-					<td class="day{if $calendar->events[ $o.ts ]} has-event{/if}">{strip}
+					<td class="day{if $calendar->events[ $o.ts ]} has-event{/if}{if $o.num==null} day-outside-month{/if}">{strip}
 						{if $o.num == null}
 							&nbsp;
 						{else}
 							{if $calendar->events[ $o.ts ]}
 								{foreach $calendar->events[ $o.ts ] as $calendar_event}
 									{if $calendar_event['url']}
-										<a href="{$calendar_event['url']}">
+										<a href="{$calendar_event['url']}" title="{$calendar_event['name']}">
 									{/if}
 									{if $calendar_event['name']}
 										{$calendar_event['name']}
