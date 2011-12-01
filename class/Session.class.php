@@ -28,7 +28,7 @@ class Session
 			$driver = 'SessionGeneric';
 		}
 
-		require_once( INCLUDE_PATH ."/drivers/session/{$driver}.class.php" );
+		require_once( Config::get( 'include-path' ) ."/drivers/session/{$driver}.class.php" );
 
 		$this->driver = new $driver();
 		self::$instance = $this;

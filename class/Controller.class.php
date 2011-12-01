@@ -33,15 +33,19 @@ class Controller
 	{
 		$this->startup();
 		$this->visitHandle();
-		$this->smarty = new Smarty();
 
-		$this->smarty->compile_dir = SMARTY_COMPILE_DIR;
-		//$this->smarty->template_dir = SMARTY_TEMPLATES_DIR . $this->lang .'/';
-		$this->smarty->template_dir = SMARTY_TEMPLATES_DIR;
-
-		if( !file_exists( $this->smarty->compile_dir ) )
+		if( Config::get( 'smarty' ) )
 		{
-			mkdir( $this->smarty->compile_dir );
+			$this->smarty = new Smarty();
+
+			$this->smarty->compile_dir = Config::get( 'smarty.compile-dir' );
+			//$this->smarty->template_dir = SMARTY_TEMPLATES_DIR . $this->lang .'/';
+			$this->smarty->template_dir = Config::get( 'smarty.templates-dir' );
+
+			if( !file_exists( $this->smarty->compile_dir ) )
+			{
+				mkdir( $this->smarty->compile_dir );
+			}
 		}
 
 		/*$lang = 'pl';
@@ -221,8 +225,24 @@ class Controller
 
 	public function fetch( $template, $dir = null )
 	{
-		if( !$dir ) $dir = $this->smarty->template_dir;
-		$output = $this->smarty->fetch( $dir . $template );
+		if( !$dir )
+		{
+			$dir = $this->smarty->template_dir;
+		}
+
+		if( file_exists( $dir . $template ) )
+		{
+			$output = $this->smarty->fetch( $dir . $template );
+		}
+		elseif( file_exists( Config::get( 'include-path' ) .'/templates/'. $template ) )
+		{
+			$output = $this->smarty->fetch( Config::get( 'include-path' ) .'/templates/'. $template );
+		}
+		else
+		{
+			throw new SmartyException( "Template \"{$dir}{$template}\" not found." );
+		}
+
 		return $output;
 	}
 
