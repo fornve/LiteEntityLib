@@ -38,7 +38,12 @@ class Cache
 
 	function __construct()
 	{
-		switch( CACHE_TYPE )
+		if( !Config::_( 'cache' ) )
+		{
+			return false;
+		}
+
+		switch( Config::_( 'cache.type' ) )
 		{
 			case 'memcache':
 			{
@@ -46,10 +51,14 @@ class Cache
 					return false;
 
 				if( !self::$cache )
+				{
 					self::$cache = new Memcache();
+				}
 
-				if( !self::$cache->connect( CACHE_HOST, (int)CACHE_PORT ) )
+				if( !self::$cache->connect( Config::_( 'cache.host' ), (int)Config::_( 'cache.port' ) ) )
+				{
 					self::$cache = null;
+				}
 
 				break;
 			}
@@ -69,8 +78,10 @@ class Cache
 	{
 		if( self::$cache )
 		{
-			if( defined( 'PRODUCTION' ) && !PRODUCTION )
+			if( !Config::_( 'production' ) )
+			{
 				$_SESSION[ 'cache_query' ][] = "+ ". $key;
+			}
 
 			self::$cache->set( $key, $var, $flag, $expire );
 		}
@@ -80,8 +91,10 @@ class Cache
 	{
 		if( self::$cache )
 		{
-			if( defined( 'PRODUCTION' ) && !PRODUCTION )
+			if( !Config::_( 'production' ) )
+			{
 				$_SESSION[ 'cache_query' ][] = "= ". $key;
+			}
 
 			return self::$cache->get( $key, $flags );
 		}
@@ -91,8 +104,10 @@ class Cache
 	{
 		if( self::$cache )
 		{
-			if( defined( 'PRODUCTION' ) && !PRODUCTION )
+			if( !Config::_( 'production' ) )
+			{
 				$_SESSION[ 'cache_query' ][] = "- ". $key;
+			}
 
 			self::$cache->delete( $key, $timeout );
 		}
@@ -101,6 +116,8 @@ class Cache
 	function close()
 	{
 		if( self::$cache )
+		{
 			return self::$cache->close();
+		}
 	}
 }
