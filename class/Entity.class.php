@@ -118,7 +118,7 @@ class Entity
 		$driver = isset( self::$driver ) ? self::$driver : Config::get( 'DB_TYPE' );
 		$dsn	= isset( self::$dsn ) ? self::$dsn : Config::get( 'DSN' );
 
-		require_once( INCLUDE_PATH ."/drivers/entity/{$driver}.class.php" );
+		require_once( Config::get( 'include-path' ) ."/drivers/entity/{$driver}.class.php" );
 
 		return new $driver( $dsn );
 	}
@@ -138,12 +138,12 @@ class Entity
 	 */
 	public function query( $query, $arguments = null )
 	{
-		if( defined( 'DB_TABLE_PREFIX' ) && DB_TABLE_PREFIX )
+		if( Config::get( 'db.table-prefix' ) )
 		{
-			$query = $this->Prefix( $query );
+			$query = $this->prefix( $query );
 		}
 
-		$query = $this->Arguments( $query, $arguments );
+		$query = $this->arguments( $query, $arguments );
 
 		$this->db_query_counter++;
 
@@ -154,7 +154,7 @@ class Entity
 			$this->error = self::$db->error;
 			$this->query = $query;
 
-			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			if( !Config::get( 'production' ) )
 			{
 				$_SESSION[ 'entity_query' ][] = $query;
 			}
@@ -219,14 +219,14 @@ class Entity
 
 		try
 		{
-			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			if( Config::get( 'production' ) === false )
 			{
 				$timer = microtime( true );
 			}
 
 			$result = self::$db->query( $query );
 
-			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			if( Config::get( 'production' ) === false )
 			{
 				$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
 			}
@@ -237,7 +237,7 @@ class Entity
 			{
 				$this->result = $this->buildResult( $result, $class );
 
-				if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+				if( Config::get( 'production' ) === false )
 				{
 					$_SESSION[ 'entity_query' ][] = "[{$timer}] ". $query;
 				}
@@ -279,7 +279,7 @@ class Entity
 
 		try
 		{
-			if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+			if( Config::get( 'production' ) === false )
 			{
 				$timer = microtime( true );
 			}
@@ -288,7 +288,7 @@ class Entity
 
 			if( count( $this->schema ) > 0 )
 			{
-				if( defined( 'PRODUCTION' ) && PRODUCTION === false )
+				if( Config::get( 'production' ) === false )
 				{
 					$timer = round( 1000 * ( microtime( true ) - $timer ), 2);
 					$_SESSION[ 'entity_query' ][] = "[{$timer}] Schema build for '{$this->table_name}'";
@@ -653,10 +653,10 @@ class Entity
 	protected function prefix( $query )
 	{
 		//global $mosConfig_dbprefix; // joomla 1.0
-		if( defined( 'DB_TABLE_PREFIX' ) )
+		if( Config::get( 'db.table-prefix' ) )
 		{
 			$exp = explode( '#__', $query );
-			$query = implode( DB_TABLE_PREFIX, $exp );
+			$query = implode( Config::get( 'db.table-prefix' ), $exp );
 		}
 
 		return $query;

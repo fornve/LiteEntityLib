@@ -33,16 +33,23 @@ class Controller
 	{
 		$this->startup();
 		$this->visitHandle();
-		$this->smarty = new Smarty();
 
-		$this->smarty->compile_dir = SMARTY_COMPILE_DIR;
-		//$this->smarty->template_dir = SMARTY_TEMPLATES_DIR . $this->lang .'/';
-		$this->smarty->template_dir = SMARTY_TEMPLATES_DIR;
-
-		if( !file_exists( $this->smarty->compile_dir ) )
+		if( Config::get( 'smarty' ) )
 		{
-			mkdir( $this->smarty->compile_dir );
+			$this->smarty = new Smarty();
+
+			$this->smarty->compile_dir = Config::get( 'smarty.compile-dir' );
+			//$this->smarty->template_dir = SMARTY_TEMPLATES_DIR . $this->lang .'/';
+			$this->smarty->template_dir = Config::get( 'smarty.templates-dir' );
+			$this->smarty->allow_php_tag = true;
+
+			if( !file_exists( $this->smarty->compile_dir ) )
+			{
+				mkdir( $this->smarty->compile_dir );
+			}
 		}
+
+		$this->assign( 'config', new ConfigWrapper() );
 
 		/*$lang = 'pl';
 
@@ -176,7 +183,8 @@ class Controller
 		$this->assign( 'breadcrumbs', array( array( 'name' => 'Error' ) ) );
 		$this->assign( 'error', $this->error->getMessage() );
 		$this->assign( 'e', $this->error );
-		echo $this->Decorate( "catchable-error.tpl" );
+		echo $this->decorate( "catchable-error.tpl" );
+		exit;
 	}
 
 	public function entityError()
@@ -186,7 +194,8 @@ class Controller
 		$this->assign( 'breadcrumbs', array( array( 'name' => 'Error' ) ) );
 		$this->assign( 'error', $this->error->getMessage() );
 		$this->assign( 'e', $this->error );
-		echo $this->Decorate( "entity-error.tpl" );
+		echo $this->decorate( "entity-error.tpl" );
+		exit;
 	}
 
 	public function genericError()
@@ -195,7 +204,8 @@ class Controller
 
 		$this->assign( 'breadcrumbs', array( array( 'name' => 'Error' ) ) );
 		$this->assign( 'error', $this->error->getMessage() );
-		echo $this->Decorate( "generic-error.tpl" );
+		echo $this->decorate( "generic-error.tpl" );
+		exit;
 	}
 
 	public function notFound()
@@ -204,7 +214,7 @@ class Controller
 
 		$this->assign( 'breadcrumbs', array( array( 'name' => 'Not found' ) ) );
 
-		if( PRODUCTION )
+		if( Config::get( 'production' ) )
 		{
 			echo $this->Decorate( "404.tpl" );
 		}
@@ -221,8 +231,24 @@ class Controller
 
 	public function fetch( $template, $dir = null )
 	{
-		if( !$dir ) $dir = $this->smarty->template_dir;
-		$output = $this->smarty->fetch( $dir . $template );
+		if( !$dir )
+		{
+			$dir = $this->smarty->template_dir;
+		}
+
+		if( file_exists( $dir . $template ) )
+		{
+			$output = $this->smarty->fetch( $dir . $template );
+		}
+		elseif( file_exists( Config::get( 'include-path' ) .'/templates/'. $template ) )
+		{
+			$output = $this->smarty->fetch( Config::get( 'include-path' ) .'/templates/'. $template );
+		}
+		else
+		{
+			throw new SmartyException( "Template \"{$dir}{$template}\" not found." );
+		}
+
 		return $output;
 	}
 
@@ -246,6 +272,7 @@ class Controller
 				{
 					$this->smarty->assign( 'memory_peak', round( memory_get_peak_usage() / 1024, 2 ) );
 				}
+
 				$content = $this->smarty->fetch( $dir .'decoration.tpl' );
 				$this->PostDecorate();
 
@@ -282,9 +309,9 @@ class Controller
 			$this->smarty->assign( 'logged_user', $user );
 		}
 
-		if( !Config::get( 'site', 'production' ) )
+		if( !Config::get( 'production' ) )
 		{
-			$generated = floor ( 10000 * ( microtime( true ) - TIMER ) ) / 10000;
+			$generated = floor ( 10000 * ( microtime( true ) - Config::get( 'timer' ) ) ) / 10000;
 			$this->smarty->assign( 'generated', $generated );
 			$this->smarty->assign( 'entity_query', Session::get( 'entity_query' ) );
 			$this->smarty->assign( 'cache_query', Session::get( 'cache_query' ) );
