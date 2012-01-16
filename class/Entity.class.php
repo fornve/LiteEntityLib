@@ -556,6 +556,12 @@ class Entity
 		return $entity->Collection( $query, null, $class, $limit, $offset );
 	}
 
+	public function getId()
+	{
+		$id_name = $this->id_name;
+		return $this->$id_name;
+	}
+
 	public function escapeTable( $string )
 	{
 		return self::$db->escapeTable( $string );
