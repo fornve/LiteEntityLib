@@ -21,7 +21,7 @@ class Session
 
 	public function __construct()
 	{
-		$driver = Config::get( 'session_driver' );
+		$driver = Config::get( 'session.driver' );
 
 		if( !$driver )
 		{
