@@ -318,10 +318,11 @@ class Entity
 	 * Retrieve row from database where id = $id ( or id => $id_name  )
 	 * @param int $id
 	 * @param string $class
+	 * @param string
 	 * @return object
 	 * Returns object type of entity
 	 */
-	public static function retrieve( $id, $class = null )
+	public static function retrieve( $id, $class = null, $by_field = null )
 	{
 		if( !$class && !function_exists( 'get_called_class' ) )
 		{
@@ -338,7 +339,19 @@ class Entity
 			$object->buildSchema();
 			$entity = Entity::getInstance();
 
-			$query = "SELECT * FROM ". $entity->escapeTable( $object->table_name ) ." WHERE ". $entity->escapeColumn( $object->id_name ) ." = ? LIMIT 1";
+			if( $by_field === null )
+			{
+				$by_field = $object->id_name;
+			}
+			else
+			{
+				if( !in_array( $by_field, $object->getSchema() ) )
+				{
+					throw new EntityException( "Column {$by_field} does not exist." );
+				}
+			}
+
+			$query = "SELECT * FROM ". $entity->escapeTable( $object->table_name ) ." WHERE ". $entity->escapeColumn( $by_field ) ." = ? LIMIT 1";
 
 			$object = $entity->getFirstResult( $query, $id, $class );
 
@@ -554,6 +567,12 @@ class Entity
 		$query = "SELECT * from ". $entity->escapeTable( $object->table_name ) ." ORDER BY ". $entity->escapeColumn( $object->id_name );
 
 		return $entity->Collection( $query, null, $class, $limit, $offset );
+	}
+
+	public function getId()
+	{
+		$id_name = $this->id_name;
+		return $this->$id_name;
 	}
 
 	public function escapeTable( $string )

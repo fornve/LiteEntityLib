@@ -103,7 +103,7 @@ class FormField
 		}
 	}
 
-	function validation( $validation, $p1 = null, $p2 = null, $p3 = null, $p4 = null )
+	public function validation( $validation, $p1 = null, $p2 = null, $p3 = null, $p4 = null )
 	{
 		$this->$validation( $p1, $p2, $p3, $p4 );
 
@@ -158,7 +158,7 @@ class FormField
 		}
 		else
 		{
-			if( strlen( $this->value ) > $max_length &&  strlen( $this->value ) < $min_length )
+			if( strlen( $this->value ) > $max_length || strlen( $this->value ) < $min_length )
 			{
 				if( !$error_text )
 					$error_text = "Must be between {$min_length} and {$max_length} characters.";

@@ -21,7 +21,7 @@ class Form
 	public $submit = array( 'value' => 'Submit' );
 	public $posted = false;
 
-	function __construct( $action = "/", $method = 'get' )
+	public function __construct( $action = "/", $method = 'get' )
 	{
 		$this->action = $action;
 		$this->method = strtolower( $method );
@@ -32,7 +32,22 @@ class Form
 		}
 	}
 
-	function validate()
+	public function addField( $name, $label, $type = 'text', $value = null )
+	{
+		return $this->fields[ $name ] = new FormField( $name, $label, $type, $value );
+	}
+
+	public function getField( $name )
+	{
+		if( !$this->fields[ $name ] )
+		{
+			throw new Exception( "Form exception: field '{$name}' not found." );
+		}
+
+		return $this->fields[ $name ];
+	}
+
+	public function validate()
 	{
 		$error = 0;
 
