@@ -23,9 +23,8 @@ class Calendar
 		// day offset, 1 is monday, 0 is sunday
 		$day_offset = 1;
 
-		$start_day = gmmktime ( 0, 0, 0, $month, 1, $year );
-		$start_day_number = date ( 'w', $start_day );
-		$days_in_month = date ( 't', $start_day );
+		$start_day_number = date ( 'w', $now );
+		$days_in_month = date ( 't', $now );
 		$row = 0;
 		$cal = array();
 		$trow = 0;

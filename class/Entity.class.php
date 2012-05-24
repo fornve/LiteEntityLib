@@ -304,6 +304,18 @@ class Entity
 		return $this->schema;
 	}
 
+	public function getDataObject()
+	{
+		$data = new stdClass();
+
+		foreach( $this->getSchema() as $key )
+		{
+			$data->$key = $this->$key;
+		}
+
+		return $data;
+	}
+
 	public function getTableName()
 	{
 		if( !$this->table_name )
