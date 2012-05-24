@@ -59,12 +59,16 @@
 						{if $field->multiple} multiple="multiple"{/if}
 						>
 						{foreach from=$field->options item=option key=value}
-							<option
-								{if $value} value="{$value}"
-								{if $value==$field->value || ($field->multiple && in_array($value, $field->values))} selected="selected"{/if}
-									{else} value="{$option}"{if $option==$input->$name} selected="selected"{/if}
-								{/if}
-									>{$option}</option>
+							{if $option instanceof Entity}
+								<option	value="{$option->getId()}" {if $option->getId()==$field->value || ($field->multiple && in_array($option->getId(), $field->values))} selected="selected"{/if} >{$option->getName()}</option>
+							{else}
+								<option
+									{if $value} value="{$value}"
+									{if $value==$field->value || ($field->multiple && in_array($value, $field->values))} selected="selected"{/if}
+										{else} value="{$option}"{if $option==$input->$name} selected="selected"{/if}
+									{/if}
+										>{$option}</option>
+							{/if}
 						{/foreach}
 					</select>
 				{elseif $field->type == 'select_country'}
