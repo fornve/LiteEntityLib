@@ -550,6 +550,12 @@ class Entity
 	}
 
 	public function preDelete() {}
+
+	public static function flatQuery( $query )
+	{
+		return str_replace( '  ', ' ', str_replace( "\n", ' ', $query ) );
+	}
+
 	public function flushCache() {}
 
 	public function delete()
