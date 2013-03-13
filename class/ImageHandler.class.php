@@ -26,6 +26,7 @@ class ImageHandler
 	public $height = 0;
 	public $force_regeneration = false;
 	public $add_borders = false;
+	public $options = false;
 	public $jpeg_quality = 100; // int {0-100} - 100 means 100% quality
 	public $limit = 1600; // height / width limit (in pixels)
 	public $zoom_up = true; // Should system zoom up smaller images to requested height?
@@ -67,44 +68,47 @@ class ImageHandler
 			throw new Exception( "Image {$file} not loaded." );
 		}
 
-		if( $this->autorotate )
+		if( $this->autorotate && function_exists( 'exif_read_data' ) )
 		{
 			$exif = exif_read_data( $file );
 
-			switch( $exif[ 'Orientation' ] )
+			if( isset( $exif[ 'Orientation' ] ) )
 			{
-				case 1: // nothing
-				break;
+				switch( $exif[ 'Orientation' ] )
+				{
+					case 1: // nothing
+					break;
 
-				case 2: // horizontal flip
-				//	$image->flipImage($public,1);
-				break;
+					case 2: // horizontal flip
+					//	$image->flipImage($public,1);
+					break;
 
-				case 3: // 180 rotate left
-					$image = imagerotate( $image, 180, $background );
-				break;
+					case 3: // 180 rotate left
+						$image = imagerotate( $image, 180, $background );
+					break;
 
-				case 4: // vertical flip
-				//	$image->flipImage($public,2);
-				break;
+					case 4: // vertical flip
+					//	$image->flipImage($public,2);
+					break;
 
-				case 5: // vertical flip + 90 rotate right
-				//	$image->flipImage($public, 2);
+					case 5: // vertical flip + 90 rotate right
+					//	$image->flipImage($public, 2);
+							$image = imagerotate( $image, -90, $background );
+					break;
+
+					case 6: // 90 rotate right
 						$image = imagerotate( $image, -90, $background );
-				break;
+					break;
 
-				case 6: // 90 rotate right
-					$image = imagerotate( $image, -90, $background );
-				break;
+					case 7: // horizontal flip + 90 rotate right
+					//	$image->flipImage($public,1);
+						$image = imagerotate( $image, -90, $background );
+					break;
 
-				case 7: // horizontal flip + 90 rotate right
-				//	$image->flipImage($public,1);
-					$image = imagerotate( $image, -90, $background );
-				break;
-
-				case 8:    // 90 rotate left
-					$image = imagerotate( $image, 90, $background );
-				break;
+					case 8:    // 90 rotate left
+						$image = imagerotate( $image, 90, $background );
+					break;
+				}
 			}
 		}
 
