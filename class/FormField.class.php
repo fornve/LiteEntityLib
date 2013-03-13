@@ -182,7 +182,9 @@ class FormField
 	protected function inDatabase( $error_text, $table, $column )
 	{
 		if( !$this->value )
+		{
 			return false;
+		}
 
 		$entity = Entity::getInstance();
 		$query = "SELECT * FROM ". $entity->escapeTable( strtolower( $table ) ) ." WHERE ". $entity->escapeColumn( strtolower( $column ) ) ." = ?";

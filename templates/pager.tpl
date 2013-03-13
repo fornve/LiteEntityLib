@@ -70,7 +70,7 @@ ul.pager { border:0; margin: 10px 0 0 0; padding:0; }
 {assign var=min value=$pager->page*$pager->elements-5-$pager->elements}
 
 <ul class="pager">
-		<li class="page_info">Page: {$pager->page} of {$pager->CountPages()} </li>
+		<li class="page_info">Page: {$pager->page} of {$pager->countPages()} </li>
 	{if $pager->max > 1}
 		{if $pager->max > 1 && $pager->page > 1}
 			<li><span class="inactive"> &lt;&lt; </span><a href="{$pager->self}/1/{$pager->option}">First</a></li>

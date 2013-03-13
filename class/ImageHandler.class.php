@@ -57,10 +57,10 @@ class ImageHandler
 
 	// image manipulation methods
 
-	protected function Load( $file )
+	protected function load( $file )
 	{
 		$image = imagecreatefromstring( file_get_contents( $file ) );
-		$background = imagecolorallocatealpha( $image, 255, 255, 255, 0 );
+		$background = imagecolorallocatealpha( $image, 255, 255, 255, 127 );
 
 		if( !$image )
 		{
@@ -115,7 +115,7 @@ class ImageHandler
 	{
 		$valid_extensions = array( 'jpg' => 'jpeg', 'jpeg' => 'jpeg', 'png' => 'png' );
 
-		$filename = explode( '.',strtolower(  basename( $this->file ) ) );
+		$filename = explode( '.', strtolower(  basename( $this->file ) ) );
 		$extension = $filename[ count( $filename ) - 1 ];
 
 		$this->file_type = $valid_extensions[ $extension ];
@@ -188,11 +188,11 @@ class ImageHandler
 
 		imagesavealpha( $destination_image, true );
 
-		if( $this->file_type == 'jpeg' )
+		if( strtolower( $this->file_type ) == 'jpeg' )
 		{
 			$background = imagecolorallocatealpha( $destination_image, 255, 255, 255, 0 );
 		}
-		elseif( $this->file_type == 'png' )
+		elseif( strtolower( $this->file_type ) == 'png' )
 		{
 			$background = imagecolorallocatealpha( $destination_image, 255, 255, 255, 127 );
 		}
@@ -379,7 +379,7 @@ class ImageHandler
 			$this->height = $this->limit;
 		}
 
-		$this->Process();
+		$this->process();
 		header( "Content-Type: image/{$this->file_type}" );
 		header( "Pragma: hack" );
 		header( "Expires: " . gmdate("D, d M Y H:i:s", time() + 18144000 ) . " GMT" );
